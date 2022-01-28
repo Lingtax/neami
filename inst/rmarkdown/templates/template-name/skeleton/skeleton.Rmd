@@ -1,0 +1,45 @@
+---
+title: "Research and Evaluation Report"
+author: "<Your Name> for the R&E team"
+date: "Last compiled on `r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  bookdown::pdf_document2: 
+   reference_docx: "`r system.file("rmarkdown/templates/template-name/skeleton/template.docx", package = "neami")`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+# Put your library calls here 
+library(neami)
+library(ggplot2)
+
+```
+
+# Level 1 Heading
+
+You can place standard text in locations like this, you can easily adorn this 
+with standard formatting features like ***bold***, *italics*, and `monospaced 
+font` for code.
+
+R does not automatically wrap text, so you should press return/enter when your 
+line starts to get a little hard to fit on your screen, to place a linebreak in 
+your output text, press enter twice. 
+
+## Level 2 Heading
+
+Code can go in code-chunks, you can invoke a new code chunk by pressing 
+`ctrl-alt-i`. If you then name the chunk (by placing a name after the "{r " at 
+the top, you can make cross-references to the products of the chunk in text, for 
+example, See Figure \@ref(fig:test-plot).
+
+```{r test-plot, fig.cap="Some test data.", echo=FALSE}
+plt <-  ggplot(chickwts, aes(x = feed, y = weight/100, fill = feed)) +
+  geom_jitter() +
+  geom_violin(alpha = .5) +
+  scale_colour_neami(discrete = TRUE) +
+  labs(x = "Group", y = "Symptoms") +
+  theme_neami() +
+  theme(legend.position = "none")
+  
+finalise_plot(plt, source = "Carelink+", save = FALSE)
+```
