@@ -19,15 +19,16 @@
 #' @export
 neami_palettes <-
   list(
-    neami_qual = c("#FFAD00",
+    neami_qual = c("#F2A900",
                    "#537EC0",
-                   "#C52C7C",
+                   "#C82F67",
+                   "#88CEB7",
                    "#404040"),
 
     neami_seq1 = c("grey90", "#537EC0"),
-    neami_seq2 = c("grey90", "#FFAD00"),
+    neami_seq2 = c("grey90", "#F2A900"),
 
 
     neami_diverging = c("#537EC0",
-                        "#FFAD00")
+                        "#F2A900")
   )

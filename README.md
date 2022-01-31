@@ -8,8 +8,8 @@
 
 The goal of neami is to support the production of high-quality research
 and evaluation reports within the organisation. It borrows functionality
-from the (BBC bbplot)\[<https://github.com/bbc/bbplot>\] package and the
-(ochRe)\[<https://github.com/hollylkirk/ochRe>\] package.
+from the BBC bbplot\](<https://github.com/bbc/bbplot>) package and the
+[ochRe](https://github.com/hollylkirk/ochRe) package.
 
 ## Installation
 
@@ -45,45 +45,18 @@ source of data.
 p1 <- p1 + labs(title = "A Neami styled plot", 
                 subtitle = "with a subtitle") + theme_neami()
 finalise_plot(p1, source = "Made-up data", save = FALSE)
-#> Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-#> family not found in Windows font database
-
-#> Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-#> family not found in Windows font database
-
-#> Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-#> family not found in Windows font database
-
-#> Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-#> family not found in Windows font database
-
-#> Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-#> family not found in Windows font database
-
-#> Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-#> family not found in Windows font database
-
-#> Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-#> family not found in Windows font database
-
-#> Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-#> family not found in Windows font database
-
-#> Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-#> family not found in Windows font database
-
-#> Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-#> family not found in Windows font database
-
-#> Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-#> family not found in Windows font database
-#> Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-#> font family not found in Windows font database
-#> Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-#> family not found in Windows font database
-
-#> Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-#> family not found in Windows font database
 ```
 
 <img src="man/figures/README-finalise_plot-1.png" width="100%" />
+
+## Managing fonts.
+
+Neami standards are in the style guide To enable the fonts, install
+Utopia Std and Brandon text, then run:
+
+``` r
+install.packages(extrafont)
+library(extrafont)
+font_import()
+loadfonts(device = "win")
+```

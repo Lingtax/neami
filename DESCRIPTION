@@ -3,8 +3,9 @@ Type: Package
 Title: Tools for Reporting and Analysis at Neami National
 Version: 0.0.0.9000
 Authors@R: 
-    person("Mathew", "Ling", , "mathewtyling@gmail.com", role = c("aut", "cre"),
-    comment = c(ORCID = "0000-0002-0940-2538")
+    c(person("Mathew", "Ling", , "mathewtyling@gmail.com", role = c("aut", "cre"),
+    comment = c(ORCID = "0000-0002-0940-2538")), 
+    person("Cristal", "Hall", , "Cristal.Hall@neaminational.org.au", role = "aut"))
 Description: The neami package contains functions for default formatting of plot 
     objects along with helper functions to support streamlining of common data 
     operations. 
