@@ -18,7 +18,7 @@ neami_pal <- function(palette="neami_qual", alpha = 1, reverse = FALSE) {
   if (reverse){
     pal <- rev(pal)
   }
-  return(colorRampPalette(pal, alpha))
+  return(grDevices::colorRampPalette(pal, alpha))
 }
 
 #' Setup colour palette for ggplot2
@@ -58,9 +58,9 @@ neami_pal <- function(palette="neami_qual", alpha = 1, reverse = FALSE) {
 scale_color_neami <- function(..., palette="neami_qual",
                               discrete = TRUE, alpha = 1, reverse = FALSE) {
   if (discrete) {
-    discrete_scale("colour", "neami", palette=neami_pal(palette, alpha = alpha, reverse = reverse))
+    ggplot2::discrete_scale("colour", "neami", palette=neami_pal(palette, alpha = alpha, reverse = reverse))
   } else {
-    scale_color_gradientn(colours = neami_pal(palette, alpha = alpha, reverse = reverse, ...)(256))
+    ggplot2::scale_color_gradientn(colours = neami_pal(palette, alpha = alpha, reverse = reverse, ...)(256))
   }
   #scale_colour_manual(values=neami_palettes[[palette]])
 }
@@ -86,9 +86,9 @@ scale_colour_neami <- scale_color_neami
 scale_fill_neami <- function(..., palette="neami_qual",
                              discrete = TRUE, alpha=1, reverse = TRUE) {
   if (discrete) {
-    discrete_scale("fill", "neami", palette=neami_pal(palette, alpha = alpha, reverse = reverse))
+    ggplot2::discrete_scale("fill", "neami", palette=neami_pal(palette, alpha = alpha, reverse = reverse))
   }
   else {
-    scale_fill_gradientn(colours = neami_pal(palette, alpha = alpha, reverse = reverse, ...)(256))
+    ggplot2::scale_fill_gradientn(colours = neami_pal(palette, alpha = alpha, reverse = reverse, ...)(256))
   }
 }

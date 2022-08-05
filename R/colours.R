@@ -25,8 +25,8 @@ neami_palettes <-
                    "#88CEB7",
                    "#404040"),
 
-    neami_seq1 = c("grey90", "#537EC0"),
-    neami_seq2 = c("grey90", "#F2A900"),
+    neami_seq1 = c("#537EC0", "grey90"),
+    neami_seq2 = c("#F2A900", "grey90"),
 
 
     neami_diverging = c("#537EC0",

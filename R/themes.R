@@ -26,14 +26,26 @@ theme_neami <- function() {
 #' ggplot() + geom_sf(data = world1) + theme_neami_map()
 theme_neami_map <- function() {
   ggplot2::theme_classic() +
-    ggplot2::theme(text = element_text(size = 16, family = "Brandon Text Regular", colour = "#4a4a4a"),
-                   plot.title = element_text(family = "Utopia Std", colour = "#53565a"),
-                   axis.ticks = element_blank(), axis.text = element_blank(),
-                   axis.title = element_blank())
+    ggplot2::theme(text = ggplot2::element_text(size = 16, family = "Brandon Text Regular", colour = "#4a4a4a"),
+                   plot.title = ggplot2::element_text(family = "Utopia Std", colour = "#53565a"),
+                   axis.ticks = ggplot2::element_blank(),
+                   axis.text = ggplot2::element_blank(),
+                   axis.title = ggplot2::element_blank())
 }
 
 
-save_plot <- function (plot_grid, width, height, save_filepath) {
+#' Saves a neami themed plot
+#'
+#' @param plot_grid
+#' @param width
+#' @param height
+#' @param save_filepath
+#'
+#' @return
+#' @export
+#'
+#' @examples
+save_plot <- function(plot_grid, width, height, save_filepath) {
 
   grid::grid.draw(plot_grid)
   #save it
@@ -41,7 +53,15 @@ save_plot <- function (plot_grid, width, height, save_filepath) {
                   plot=plot_grid, width=(width/72), height=(height/72),  bg="white")
 }
 
-#Left align text
+
+#' Left align plot elements for themed plot
+#'
+#' @param plot_name
+#' @param pieces
+#'
+#' @return
+#'
+#' @examples
 left_align <- function(plot_name, pieces){
   grob <- ggplot2::ggplotGrob(plot_name)
   n <- length(pieces)

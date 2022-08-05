@@ -14,7 +14,9 @@ Encoding: UTF-8
 LazyData: true
 Imports: 
     bbplot,
-    ggplot2
+    extrafont,
+    ggplot2,
+    grDevices
 Remotes: bbc/bbplot
 Depends: 
     R (>= 2.10)
