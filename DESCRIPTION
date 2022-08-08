@@ -16,7 +16,8 @@ Imports:
     bbplot,
     extrafont,
     ggplot2,
-    grDevices
+    grDevices,
+    Hmisc
 Remotes: bbc/bbplot
 Depends: 
     R (>= 2.10)
