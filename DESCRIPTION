@@ -19,7 +19,9 @@ Imports:
     extrafont,
     ggplot2,
     grDevices,
-    Hmisc
+    Hmisc,
+    magrittr,
+    waffle
 Remotes: bbc/bbplot
 Depends: 
     R (>= 2.10)
