@@ -6,7 +6,7 @@
 #' @export
 #'
 #' @examples
-#' bin_age_10(sample(2:90, 200))
+#' bin_age_10(sample(2:90, 20, replace = TRUE))
 bin_age_10 <- function(age){
 
     age <-  as.character(

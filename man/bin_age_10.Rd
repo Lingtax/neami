@@ -16,5 +16,5 @@ a factor vector of 10 year age brackets
 Bins ages against ABS age standard
 }
 \examples{
-bin_age_10(sample(2:90, 200))
+bin_age_10(sample(2:90, 20, replace = TRUE))
 }
