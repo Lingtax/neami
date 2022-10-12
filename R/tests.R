@@ -9,6 +9,8 @@
 #' @export
 #'
 #' @examples
+#' test <- data.frame(id= sort(rep(1:10, 2)),obs = rep(1:2, 10), value = rnorm(20))
+#' paired_t_test(test, value, obs, id_cols = id)
 paired_t_test <-  function(df, outcome, timeid, id_cols = NULL) {
   df <- dplyr::ungroup(df)
   lvls <- dplyr::distinct(df, {{ timeid }}) %>% dplyr::pull(1)

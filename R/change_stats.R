@@ -60,5 +60,7 @@ flag_k10_changes <-  function(data, name = name, value = value, levels = c("pre"
   data %>%
   pivot_wider(names_from = {{name}}, values_from = {{value}}) %>%
   add_k10_change(pre = .[levels[[1]]], post = .[levels[[2]]]) %>%
-    pivot_longer(cols = levels)
+    pivot_longer(cols = levels) %>%
+    unnest(k10_change) %>%
+  rename(k10_change = matches(all_of(levels[[2]])))
 }
