@@ -3,14 +3,18 @@
 #' @param df a long dataframe or tibble
 #' @param outcome the continuous numerical outcome variable for comparison
 #' @param timeid the variable indexing the timepoint
+#' @param id_cols the variable indexing the subject
 #'
 #' @return
 #' @export
 #'
 #' @examples
-paired_t_test <-  function(df, outcome, timeid) {
+paired_t_test <-  function(df, outcome, timeid, id_cols = NULL) {
+  df <- dplyr::ungroup(df)
   lvls <- dplyr::distinct(df, {{ timeid }}) %>% dplyr::pull(1)
-  df <- tidyr::pivot_wider(df, names_from = {{ timeid }}, values_from = {{ outcome }})
+  df <- tidyr::pivot_wider(df, names_from = {{ timeid }},
+                           values_from = {{ outcome }},
+                           id_cols = {{ id_cols }})
 
   x <- purrr::pluck(df, lvls[1])
   y <- purrr::pluck(df, lvls[2])
