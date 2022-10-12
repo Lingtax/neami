@@ -4,7 +4,7 @@
 \alias{paired_t_test}
 \title{Implements a paired t-test from a long dataframe}
 \usage{
-paired_t_test(df, outcome, timeid)
+paired_t_test(df, outcome, timeid, id_cols = NULL)
 }
 \arguments{
 \item{df}{a long dataframe or tibble}
@@ -12,7 +12,13 @@ paired_t_test(df, outcome, timeid)
 \item{outcome}{the continuous numerical outcome variable for comparison}
 
 \item{timeid}{the variable indexing the timepoint}
+
+\item{id_cols}{the variable indexing the subject}
 }
 \description{
 Implements a paired t-test from a long dataframe
+}
+\examples{
+test <- data.frame(id= sort(rep(1:10, 2)),obs = rep(1:2, 10), value = rnorm(20))
+paired_t_test(test, value, obs, id_cols = id)
 }
