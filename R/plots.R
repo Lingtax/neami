@@ -10,11 +10,13 @@
 #' @export
 #'
 #' @examples
+#' dl <- data.frame(x= rep(c("Pre", "Post"), 20), y = rnorm(40, 25, 8), group = sort(rep(1:20, 2)), colour = sort(rep(LETTERS[1:2], 20)))
+#' dl %>% paired_t_plot(x = x, y = y, group = group, colour = colour)
 paired_t_plot <-  function(data, x, y, group, colour = NULL) {
   ggplot2::ggplot(data, ggplot2::aes(x = {{x}},
                           y = {{y}},
                           group = {{group}}, colour = {{colour}})) +
-    ggplot2::stat_summary(ggplot2::aes(group = NULL),
+    ggplot2::stat_summary(ggplot2::aes(group = NULL, colour = NULL),
                           size = 2,
                           fun.data = ggplot2::mean_sdl,
                           fun.args = list(mult = 1)) +
