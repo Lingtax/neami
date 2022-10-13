@@ -4,15 +4,16 @@
 #' @param x a bare variable name containing the timepoint indicator
 #' @param y a bare variable name containing the values for comparison
 #' @param group a bare variable name containing the case ID
+#' @param colour an optional bare variable name containing a parameter to colour on
 #'
 #' @return
 #' @export
 #'
 #' @examples
-paired_t_plot <-  function(data, x, y, group) {
-  ggplot2::ggplot(data, ggplot2::aes_string(x = deparse(substitute(x)),
-                          y = deparse(substitute(y)),
-                          group = deparse(substitute(group)))) +
+paired_t_plot <-  function(data, x, y, group, colour = NULL) {
+  ggplot2::ggplot(data, ggplot2::aes(x = {{x}},
+                          y = {{y}},
+                          group = {{group}}, colour = {{colour}})) +
     ggplot2::stat_summary(ggplot2::aes(group = NULL),
                           size = 2,
                           fun.data = ggplot2::mean_sdl,
