@@ -15,6 +15,9 @@ flag_k10_changes(data, name = name, value = value, levels = c("pre", "post"))
 
 \item{levels}{a vector of timepoint labels ordered ascending}
 }
+\value{
+the input dataframe with a raw change and a reliable change indicator appended
+}
 \description{
 Flags reliable changes to k10s in a long data frame
 }

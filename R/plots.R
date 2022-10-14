@@ -6,7 +6,6 @@
 #' @param group a bare variable name containing the case ID
 #' @param colour an optional bare variable name containing a parameter to colour on
 #'
-#' @return
 #' @export
 #'
 #' @examples
@@ -32,22 +31,22 @@ paired_t_plot <-  function(data, x, y, group, colour = NULL) {
 #'
 #' @param data a dataframe
 #' @param count_var a bare variable name indicating the column to be counted
-#' @param palette a ggplot2 compatable pallette
+#' @param rows an integer of the number of output rows
+#' @param palette a ggplot2 compatable palette
 #'
-#' @return a waffleplot
 #' @export
 #'
 #' @examples
 #' neami_waffle(mtcars, cyl)
-neami_waffle <- function(data, count_var, palette = "Set2") {
+neami_waffle <- function(data, count_var, rows = 5, palette = "Set2") {
 
   waf_dat <- data %>%
     tidyr::drop_na({{count_var}}) %>%
     dplyr::group_by({{count_var}}) %>%
-    dplyr::summarise(count=n()) %>%
-    dplyr::pull(count, name={{count_var}})
+    dplyr::summarise(count = dplyr::n()) %>%
+    dplyr::pull(count, name = {{count_var}})
 
-  waffle::waffle(waf_dat,rows=5,xlab='1 Square = 1 Consumer',
+  waffle::waffle(waf_dat,rows = rows, xlab = '1 Square = 1 Consumer',
                  colors = RColorBrewer::brewer.pal(8, palette)[seq_along(waf_dat)])
 
 }

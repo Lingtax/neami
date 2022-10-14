@@ -37,14 +37,4 @@ which needs to be a PNG file - defaults to Neami Logo image that sits within the
 Running this function will save your plot with the correct guidelines for publication by Neami.
 It will left align your title, subtitle and source, add the Neami Logo at the bottom right and save it to your specified location.
 }
-\examples{
-finalise_plot(plot_name = myplot,
-source = "The source for my data",
-save_filepath = "filename_that_my_plot_should_be_saved_to-nc.png",
-width_pixels = 640,
-height_pixels = 450,
-logo_image_path = "logo_image_filepath.png"
-)
-
-}
 \keyword{finalise_plot}

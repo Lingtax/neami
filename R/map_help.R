@@ -50,10 +50,7 @@ bounding_box <- function(lat, lon, dist, in.km = TRUE) {
 #' @param shapefile_path Path to the shapefile to join.
 #' @param state State of Australia to filter the shapefile to.
 #'
-#' @return
 #' @export
-#'
-#' @examples
 site_map <- function(lat, lon, dist = 15, suburb_df, suburb, shapefile_path, state) {
 
   bb <- bounding_box(lat, lon, dist)

@@ -21,6 +21,8 @@ scale_fill_neami(
 
 \item{alpha}{The alpha transparency, a number in [0,1], see argument alpha in
 \code{\link[grDevices]{hsv}}.}
+
+\item{reverse}{If TRUE, the direction of the colours is reversed.}
 }
 \description{
 #' Setup fill palette for ggplot2

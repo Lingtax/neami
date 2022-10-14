@@ -7,7 +7,13 @@
 save_plot(plot_grid, width, height, save_filepath)
 }
 \arguments{
-\item{save_filepath}{}
+\item{plot_grid}{The ggplot object for saving}
+
+\item{width}{the output width in default units}
+
+\item{height}{the output height in default units}
+
+\item{save_filepath}{path to save output file to}
 }
 \description{
 Saves a neami themed plot

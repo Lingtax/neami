@@ -5,7 +5,6 @@
 #' @return a vector of names
 #' @export
 #'
-#' @examples
 mmex_birth_country_code <- function(x) {
   neami::cob[as.character(x)]
 }
@@ -18,7 +17,6 @@ mmex_birth_country_code <- function(x) {
 #' @return a vector of names
 #' @export
 #'
-#' @examples
 mmex_home_lang <- function(x) {
   neami::home_lang[as.character(x)]
 }
@@ -30,7 +28,6 @@ mmex_home_lang <- function(x) {
 #' @return a vector of values
 #' @export
 #'
-#' @examples
 mmex_eng_prof <- function(x) {
   neami::eng_prof[as.character(x)]
 }

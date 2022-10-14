@@ -15,7 +15,7 @@
 #' @param pop_sd a revised estimate for the population standard deviation
 #' @param rel a revised estimate from the measure reliability
 #'
-#' @return
+#' @return the input dataframe with a raw change and a reliable change indicator appended
 #' @export
 #'
 #' @examples
@@ -26,9 +26,8 @@ add_k10_change <- function(data, pre, post, pop_sd = 9.2, rel = .92) {
 
   crit = 1.96*pop_sd*sqrt(2)*sqrt(1-rel)
 
-  data %>%
-    mutate(k10_change = {{post}} - {{pre}},
-           rel_k10_change = case_when(k10_change < -crit ~ "Improved",
+  dplyr::mutate(data, k10_change = {{post}} - {{pre}},
+           rel_k10_change = dplyr::case_when(k10_change < -crit ~ "Improved",
                                       k10_change > crit ~ "Worsened",
                                       TRUE ~ "Unchanged"
 
@@ -47,7 +46,7 @@ add_k10_change <- function(data, pre, post, pop_sd = 9.2, rel = .92) {
 #' @param value the unquoted column name containing timepoint values
 #' @param levels a vector of timepoint labels ordered ascending
 #'
-#' @return
+#' @return the input dataframe with a raw change and a reliable change indicator appended
 #' @export
 #'
 #' @examples
@@ -58,9 +57,9 @@ flag_k10_changes <-  function(data, name = name, value = value, levels = c("pre"
 
 
   data %>%
-  pivot_wider(names_from = {{name}}, values_from = {{value}}) %>%
+  tidyr::pivot_wider(names_from = {{name}}, values_from = {{value}}) %>%
   add_k10_change(pre = .[levels[[1]]], post = .[levels[[2]]]) %>%
-    pivot_longer(cols = levels) %>%
-    unnest(all_of("k10_change")) %>%
-  rename(k10_change = matches(all_of(levels[[2]])))
+    tidyr::pivot_longer(cols = levels) %>%
+    tidyr::unnest(all_of("k10_change")) %>%
+  dplyr::rename(k10_change = matches(all_of(levels[[2]])))
 }

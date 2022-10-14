@@ -2,7 +2,6 @@
 #'
 #' The function theme_neami will apply a coherent "Neami" theme to a ggplot2 object.
 #'
-#' @return
 #' @export
 #'
 #' @examples
@@ -17,7 +16,6 @@ theme_neami <- function() {
 #'
 #' Applies the Neami theme to a ggplot2 map.
 #'
-#' @return
 #' @export
 #'
 #' @examples
@@ -36,15 +34,12 @@ theme_neami_map <- function() {
 
 #' Saves a neami themed plot
 #'
-#' @param plot_grid
-#' @param width
-#' @param height
-#' @param save_filepath
+#' @param plot_grid The ggplot object for saving
+#' @param width the output width in default units
+#' @param height the output height in default units
+#' @param save_filepath path to save output file to
 #'
-#' @return
 #' @export
-#'
-#' @examples
 save_plot <- function(plot_grid, width, height, save_filepath) {
 
   grid::grid.draw(plot_grid)
@@ -56,12 +51,8 @@ save_plot <- function(plot_grid, width, height, save_filepath) {
 
 #' Left align plot elements for themed plot
 #'
-#' @param plot_name
-#' @param pieces
-#'
-#' @return
-#'
-#' @examples
+#' @param plot_name the plot object for alignment
+#' @param pieces a vector of parameter names for alignment e.g. c("subtitle", "title", "caption")
 left_align <- function(plot_name, pieces){
   grob <- ggplot2::ggplotGrob(plot_name)
   n <- length(pieces)
@@ -94,15 +85,6 @@ create_footer <- function (source_name, logo_image_path) {
 #' @return (Invisibly) an updated ggplot object.
 
 #' @keywords finalise_plot
-#' @examples
-#' finalise_plot(plot_name = myplot,
-#' source = "The source for my data",
-#' save_filepath = "filename_that_my_plot_should_be_saved_to-nc.png",
-#' width_pixels = 640,
-#' height_pixels = 450,
-#' logo_image_path = "logo_image_filepath.png"
-#' )
-#'
 #' @export
 finalise_plot <- function(plot_name,
                           source_name,

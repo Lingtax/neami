@@ -4,7 +4,7 @@
 \alias{paired_t_plot}
 \title{Create a plot to represent a paired t-test}
 \usage{
-paired_t_plot(data, x, y, group)
+paired_t_plot(data, x, y, group, colour = NULL)
 }
 \arguments{
 \item{data}{a dataframe in long format}
@@ -14,7 +14,13 @@ paired_t_plot(data, x, y, group)
 \item{y}{a bare variable name containing the values for comparison}
 
 \item{group}{a bare variable name containing the case ID}
+
+\item{colour}{an optional bare variable name containing a parameter to colour on}
 }
 \description{
 Create a plot to represent a paired t-test
+}
+\examples{
+dl <- data.frame(x= rep(c("Pre", "Post"), 20), y = rnorm(40, 25, 8), group = sort(rep(1:20, 2)), colour = sort(rep(LETTERS[1:2], 20)))
+dl \%>\% paired_t_plot(x = x, y = y, group = group, colour = colour)
 }

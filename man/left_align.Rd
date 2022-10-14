@@ -7,7 +7,9 @@
 left_align(plot_name, pieces)
 }
 \arguments{
-\item{pieces}{}
+\item{plot_name}{the plot object for alignment}
+
+\item{pieces}{a vector of parameter names for alignment e.g. c("subtitle", "title", "caption")}
 }
 \description{
 Left align plot elements for themed plot

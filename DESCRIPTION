@@ -15,12 +15,19 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports: 
-    bbplot,
+    apa,
+    dplyr,
     extrafont,
     ggplot2,
+    ggpubr,
     grDevices,
     Hmisc,
     magrittr,
+    png,
+    purrr,
+    RColorBrewer,
+    sf,
+    tidyr,
     waffle
 Remotes: bbc/bbplot
 Depends: 

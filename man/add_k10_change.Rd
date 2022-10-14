@@ -17,6 +17,9 @@ add_k10_change(data, pre, post, pop_sd = 9.2, rel = 0.92)
 
 \item{rel}{a revised estimate from the measure reliability}
 }
+\value{
+the input dataframe with a raw change and a reliable change indicator appended
+}
 \description{
 Simple differences in pre- and post- scores risks overinterpreting variation.
 Variation in outcome measures are to be expected due to uncontrolled factors

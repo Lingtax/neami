@@ -1,14 +1,12 @@
 #' neami palette with ramped colours
 #'
 #' @param palette Choose from 'neami_palettes' list
-#'
 #' @param alpha transparency
-#'
 #' @param reverse If TRUE, the direction of the colours is reversed.
 #'
 #' @examples
 #' library(scales)
-#' show_col(ochre_pal()(10))
+#' show_col(neami_pal()(10))
 #'
 #' filled.contour(volcano,color.palette = neami_pal(), asp=1)
 #'
@@ -24,18 +22,11 @@ neami_pal <- function(palette="neami_qual", alpha = 1, reverse = FALSE) {
 #' Setup colour palette for ggplot2
 #'
 #' @rdname scale_color_neami
-#'
 #' @param palette Choose from 'neami_palettes' list
-#'
 #' @param reverse logical, Reverse the order of the colours?
-#'
 #' @param alpha transparency
-#'
 #' @param discrete whether to use a discrete colour palette
-#'
 #' @param ... additional arguments to pass to scale_color_gradientn
-#'
-#' @inheritParams viridis::scale_color_viridis
 #'
 #' @importFrom ggplot2 scale_colour_manual
 #'
@@ -74,7 +65,7 @@ scale_colour_neami <- scale_color_neami
 #' @param palette Choose from 'neami_palettes' list
 #'
 #' @inheritParams viridis::scale_fill_viridis
-#' @inheritParams ochre_pal
+#' @inheritParams neami_pal
 #'
 #' @param discrete whether to use a discrete colour palette
 #'

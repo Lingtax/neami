@@ -18,7 +18,7 @@ neami palette with ramped colours
 }
 \examples{
 library(scales)
-show_col(ochre_pal()(10))
+show_col(neami_pal()(10))
 
 filled.contour(volcano,color.palette = neami_pal(), asp=1)
 

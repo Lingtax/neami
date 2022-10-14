@@ -7,11 +7,14 @@
 caption_ttest(ttest)
 }
 \arguments{
-\item{ttest}{An S3 t-test model object}
+\item{ttest}{An S3 t-test model object where equal variances are assumed}
 }
 \value{
 A character string of the model summary
 }
 \description{
 Wraps the output of a t-test into a pretty format
+}
+\examples{
+caption_ttest(t.test(1:10, y = c(7:20), var.equal = TRUE))
 }

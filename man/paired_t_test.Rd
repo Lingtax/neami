@@ -15,6 +15,9 @@ paired_t_test(df, outcome, timeid, id_cols = NULL)
 
 \item{id_cols}{the variable indexing the subject}
 }
+\value{
+a htest list-object
+}
 \description{
 Implements a paired t-test from a long dataframe
 }
