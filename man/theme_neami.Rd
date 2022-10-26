@@ -10,5 +10,5 @@ theme_neami()
 The function theme_neami will apply a coherent "Neami" theme to a ggplot2 object.
 }
 \examples{
-ggplot2::ggplot(mtcars, aes())
+ggplot2::ggplot(mtcars, ggplot2::aes())
 }

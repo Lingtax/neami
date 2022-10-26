@@ -9,8 +9,3 @@ theme_neami_map()
 \description{
 Applies the Neami theme to a ggplot2 map.
 }
-\examples{
-library(maps)
-world1 <- sf::st_as_sf(map('world', plot = FALSE, fill = TRUE))
-ggplot() + geom_sf(data = world1) + theme_neami_map()
-}

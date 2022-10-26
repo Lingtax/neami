@@ -5,7 +5,7 @@
 #' @param timeid the variable indexing the timepoint
 #' @param id_cols the variable indexing the subject
 #'
-#' @return
+#' @return a htest list-object
 #' @export
 #'
 #' @examples
@@ -27,18 +27,18 @@ paired_t_test <-  function(df, outcome, timeid, id_cols = NULL) {
 
 #' Wraps the output of a t-test into a pretty format
 #'
-#' @param ttest An S3 t-test model object
+#' @param ttest An S3 t-test model object where equal variances are assumed
 #'
 #' @return A character string of the model summary
 #' @export
 #'
-#' @examples
+#' @examples caption_ttest(t.test(1:10, y = c(7:20), var.equal = TRUE))
 caption_ttest <- function(ttest) {
 
   paste0('The difference between groups was ',
          ifelse(ttest$p.value > .05, 'not ', ''),
          'statistically significant (',
-         t_apa(ttest, print = FALSE),
+         apa::t_apa(ttest, print = FALSE),
          ')')
 
 }

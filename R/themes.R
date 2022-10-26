@@ -5,7 +5,7 @@
 #' @export
 #'
 #' @examples
-#' ggplot2::ggplot(mtcars, aes())
+#' ggplot2::ggplot(mtcars, ggplot2::aes())
 theme_neami <- function() {
    ggplot2::theme_classic() +
     ggplot2::theme(text = ggplot2::element_text(size = 16, family = "Brandon Text Regular", colour = "#4a4a4a"),
@@ -19,9 +19,10 @@ theme_neami <- function() {
 #' @export
 #'
 #' @examples
-#' library(maps)
-#' world1 <- sf::st_as_sf(map('world', plot = FALSE, fill = TRUE))
-#' ggplot() + geom_sf(data = world1) + theme_neami_map()
+#' if (requireNamespace("sf", quietly = TRUE)) {
+#'nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+#'ggplot(nc) +
+#'  geom_sf(aes(fill = AREA)) + theme_neami_map()
 theme_neami_map <- function() {
   ggplot2::theme_classic() +
     ggplot2::theme(text = ggplot2::element_text(size = 16, family = "Brandon Text Regular", colour = "#4a4a4a"),

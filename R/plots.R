@@ -21,8 +21,8 @@ paired_t_plot <-  function(data, x, y, group, colour = NULL) {
                           fun.args = list(mult = 1)) +
     ggplot2::geom_point(alpha = .25) +
     ggplot2::geom_line(alpha = .25) +
-    ggplot2::labs(x = "Timepoint", y = "Measure score") +
-    neami::theme_neami()
+    ggplot2::labs(x = "Timepoint", y = "Measure score") #+
+    #neami::theme_neami()
 }
 
 
