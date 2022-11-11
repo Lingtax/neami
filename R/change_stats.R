@@ -27,8 +27,8 @@ add_k10_change <- function(data, pre, post, pop_sd = 9.2, rel = .92) {
   crit = 1.96*pop_sd*sqrt(2)*sqrt(1-rel)
 
   dplyr::mutate(data, k10_change = {{post}} - {{pre}},
-           rel_k10_change = dplyr::case_when(k10_change < -crit ~ "Improved",
-                                      k10_change > crit ~ "Worsened",
+           rel_k10_change = dplyr::case_when(k10_change < -crit ~ "Decreased",
+                                      k10_change > crit ~ "Increased",
                                       TRUE ~ "Unchanged"
 
 
