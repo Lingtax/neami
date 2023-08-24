@@ -6,22 +6,24 @@
 #'
 #' @examples
 #' ggplot2::ggplot(mtcars, ggplot2::aes()) + theme_neami()
-theme_neami <- function() {theme(
-  plot.background = element_rect(fill = "#FFFFFF"),
-  panel.background = element_rect(fill = "#FFFFFF"),
-  legend.background = element_rect(fill = "#FFFFFF"),
-  legend.key = element_rect(fill = "#FFFFFF"),
-  line = element_line(colour = "#000000"),
-  text = element_text(colour = "#000000", face = "bold", family = "Lexend"),
-  axis.text = element_text(colour = "#000000"),
-  axis.line = element_line(colour = "#000000"),
-  panel.grid.major = element_line(linewidth = .1, colour = "#000000"),
-  panel.grid.minor = element_line(linewidth = .05, colour = "#000000"),
+theme_neami <- function() {
+  ggplot2::theme(
+  plot.background = ggplot2::element_rect(fill = "#FFFFFF"),
+  panel.background = ggplot2::element_rect(fill = "#FFFFFF"),
+  legend.background = ggplot2::element_rect(fill = "#FFFFFF"),
+  legend.key = ggplot2::element_rect(fill = "#FFFFFF"),
+  line = ggplot2::element_line(colour = "#000000"),
+  text = ggplot2::element_text(colour = "#000000", face = "bold", family = "Arial"),
+  axis.text = ggplot2::element_text(colour = "#000000"),
+  axis.line = ggplot2::element_line(colour = "#000000"),
+  panel.grid.major = ggplot2::element_line(linewidth = .1, colour = "#000000"),
+  panel.grid.minor = ggplot2::element_line(linewidth = .05, colour = "#000000"),
   legend.position = "bottom",
-  strip.background = element_rect(fill = "#cccccc"),
-  strip.text = element_text(colour = "#000000", face = "bold"),
-  panel.spacing = unit(1, "lines")
-)}
+  strip.background = ggplot2::element_rect(fill = "#cccccc"),
+  strip.text = ggplot2::element_text(colour = "#000000", face = "bold"),
+  panel.spacing = ggplot2::unit(1, "lines")
+  )
+  }
 
 #' Neami ggplot2 dark theme
 #'
@@ -31,21 +33,22 @@ theme_neami <- function() {theme(
 #'
 #' @examples
 #' ggplot2::ggplot(mtcars, ggplot2::aes()) + theme_neami_dark()
-theme_neami_dark <- function() {theme(
-  plot.background = element_rect(fill = "#01253B"),
-  panel.background = element_rect(fill = "#01253B"),
-  legend.background = element_rect(fill = "#01253B"),
-  legend.key = element_rect(fill = "#01253B"),
-  line = element_line(colour = "#FFFFFF"),
-  text = element_text(colour = "#FFFFFF", face = "bold", family = "Lexend"),
-  axis.text = element_text(colour = "#FFFFFF"),
-  axis.line = element_line(colour = "#FFFFFF"),
-  panel.grid.major = element_line(linewidth = .1),
-  panel.grid.minor = element_line(linewidth = .05),
+theme_neami_dark <- function() {
+  ggplot2::theme(
+  plot.background = ggplot2::element_rect(fill = "#01253B"),
+  panel.background = ggplot2::element_rect(fill = "#01253B"),
+  legend.background = ggplot2::element_rect(fill = "#01253B"),
+  legend.key = ggplot2::element_rect(fill = "#01253B"),
+  line = ggplot2::element_line(colour = "#FFFFFF"),
+  text = ggplot2::element_text(colour = "#FFFFFF", face = "bold", family = "Arial"),
+  axis.text = ggplot2::element_text(colour = "#FFFFFF"),
+  axis.line = ggplot2::element_line(colour = "#FFFFFF"),
+  panel.grid.major = ggplot2::element_line(linewidth = .1),
+  panel.grid.minor = ggplot2::element_line(linewidth = .05),
   legend.position = "bottom",
-  strip.background = element_rect(fill = "#4d6676"),
-  strip.text = element_text(colour = "#FFFFFF", face = "bold"),
-  panel.spacing = unit(1, "lines")
+  strip.background = ggplot2::element_rect(fill = "#4d6676"),
+  strip.text = ggplot2::element_text(colour = "#FFFFFF", face = "bold"),
+  panel.spacing = ggplot2::unit(1, "lines")
 )}
 
 
@@ -62,11 +65,11 @@ theme_neami_dark <- function() {theme(
 #'  geom_sf(aes(fill = AREA)) + theme_neami_map()
 theme_neami_map <- function() {
   ggplot2::theme_classic() +
-    ggplot2::theme(text = ggplot2::element_text(size = 16, family = "Arial", colour = "#4a4a4a"),
-                   plot.title = ggplot2::element_text(family = "Arial", colour = "#53565a"),
-                   axis.ticks = ggplot2::element_blank(),
-                   axis.text = ggplot2::element_blank(),
-                   axis.title = ggplot2::element_blank())
+    ggplot2::theme(text = ggplot2::ggplot2::element_text(size = 16, family = "Arial", colour = "#4a4a4a"),
+                   plot.title = ggplot2::ggplot2::element_text(family = "Arial", colour = "#53565a"),
+                   axis.ticks = ggplot2::ggplot2::element_blank(),
+                   axis.text = ggplot2::ggplot2::element_blank(),
+                   axis.title = ggplot2::ggplot2::element_blank())
 }
 
 
