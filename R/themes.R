@@ -13,7 +13,7 @@ theme_neami <- function() {
   legend.background = ggplot2::element_rect(fill = "#FFFFFF"),
   legend.key = ggplot2::element_rect(fill = "#FFFFFF"),
   line = ggplot2::element_line(colour = "#000000"),
-  text = ggplot2::element_text(colour = "#000000", face = "bold", family = "Arial"),
+  text = ggplot2::element_text(colour = "#000000", face = "bold", family = "lexend"),
   axis.text = ggplot2::element_text(colour = "#000000"),
   axis.line = ggplot2::element_line(colour = "#000000"),
   panel.grid.major = ggplot2::element_line(linewidth = .1, colour = "#000000", linetype = "dotted"),

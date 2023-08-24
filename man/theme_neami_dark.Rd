@@ -10,5 +10,5 @@ theme_neami_dark()
 The function theme_neami_dark will apply a coherent "Neami" dark theme to a ggplot2 object.
 }
 \examples{
-ggplot2::ggplot(mtcars, ggplot2::aes()) + theme_neami_dark
+ggplot2::ggplot(mtcars, ggplot2::aes()) + theme_neami_dark()
 }
