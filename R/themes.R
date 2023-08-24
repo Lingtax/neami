@@ -16,8 +16,8 @@ theme_neami <- function() {
   text = ggplot2::element_text(colour = "#000000", face = "bold", family = "Arial"),
   axis.text = ggplot2::element_text(colour = "#000000"),
   axis.line = ggplot2::element_line(colour = "#000000"),
-  panel.grid.major = ggplot2::element_line(linewidth = .1, colour = "#000000"),
-  panel.grid.minor = ggplot2::element_line(linewidth = .05, colour = "#000000"),
+  panel.grid.major = ggplot2::element_line(linewidth = .1, colour = "#000000", linetype = "dotted"),
+  panel.grid.minor = ggplot2::element_line(linewidth = .05, colour = "#000000", linetype = "dotted"),
   legend.position = "bottom",
   strip.background = ggplot2::element_rect(fill = "#cccccc"),
   strip.text = ggplot2::element_text(colour = "#000000", face = "bold"),
@@ -40,11 +40,11 @@ theme_neami_dark <- function() {
   legend.background = ggplot2::element_rect(fill = "#01253B"),
   legend.key = ggplot2::element_rect(fill = "#01253B"),
   line = ggplot2::element_line(colour = "#FFFFFF"),
-  text = ggplot2::element_text(colour = "#FFFFFF", face = "bold", family = "Arial"),
+  text = ggplot2::element_text(colour = "#FFFFFF", face = "bold", family = "lexend"),
   axis.text = ggplot2::element_text(colour = "#FFFFFF"),
   axis.line = ggplot2::element_line(colour = "#FFFFFF"),
-  panel.grid.major = ggplot2::element_line(linewidth = .1),
-  panel.grid.minor = ggplot2::element_line(linewidth = .05),
+  panel.grid.major = ggplot2::element_line(linewidth = .10, linetype = "dotted"),
+  panel.grid.minor = ggplot2::element_line(linewidth = .05, linetype = "dotted"),
   legend.position = "bottom",
   strip.background = ggplot2::element_rect(fill = "#4d6676"),
   strip.text = ggplot2::element_text(colour = "#FFFFFF", face = "bold"),
@@ -65,13 +65,34 @@ theme_neami_dark <- function() {
 #'  geom_sf(aes(fill = AREA)) + theme_neami_map()
 theme_neami_map <- function() {
   ggplot2::theme_classic() +
-    ggplot2::theme(text = ggplot2::ggplot2::element_text(size = 16, family = "Arial", colour = "#4a4a4a"),
-                   plot.title = ggplot2::ggplot2::element_text(family = "Arial", colour = "#53565a"),
-                   axis.ticks = ggplot2::ggplot2::element_blank(),
-                   axis.text = ggplot2::ggplot2::element_blank(),
-                   axis.title = ggplot2::ggplot2::element_blank())
+    ggplot2::theme(text = ggplot2::element_text(size = 16, family = "lexend", colour = "#4a4a4a"),
+                   plot.title = ggplot2::element_text(family = "lexend", colour = "#53565a"),
+                   axis.ticks = ggplot2::element_blank(),
+                   axis.text = ggplot2::element_blank(),
+                   axis.title = ggplot2::element_blank())
 }
 
+#' Suppress x-axis gridlines
+#'
+#' @return ggplot theme element
+#' @export
+#'
+#' @examples
+hide_x_grid <-  function() {
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
+}
+
+#' Suppress y-axis gridlines
+#'
+#' @return ggplot theme element
+#' @export
+#'
+#' @examples
+hide_y_grid <-  function() {
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank())
+}
 
 #' Saves a neami themed plot
 #'
