@@ -5,12 +5,49 @@
 #' @export
 #'
 #' @examples
-#' ggplot2::ggplot(mtcars, ggplot2::aes())
-theme_neami <- function() {
-   ggplot2::theme_classic() +
-    ggplot2::theme(text = ggplot2::element_text(size = 16, family = "Brandon Text Regular", colour = "#4a4a4a"),
-                   plot.title = ggplot2::element_text(family = "Utopia Std", colour = "#53565a"))
-}
+#' ggplot2::ggplot(mtcars, ggplot2::aes()) + theme_neami()
+theme_neami <- function() {theme(
+  plot.background = element_rect(fill = "#FFFFFF"),
+  panel.background = element_rect(fill = "#FFFFFF"),
+  legend.background = element_rect(fill = "#FFFFFF"),
+  legend.key = element_rect(fill = "#FFFFFF"),
+  line = element_line(colour = "#000000"),
+  text = element_text(colour = "#000000", face = "bold", family = "Lexend"),
+  axis.text = element_text(colour = "#000000"),
+  axis.line = element_line(colour = "#000000"),
+  panel.grid.major = element_line(linewidth = .1, colour = "#000000"),
+  panel.grid.minor = element_line(linewidth = .05, colour = "#000000"),
+  legend.position = "bottom",
+  strip.background = element_rect(fill = "#cccccc"),
+  strip.text = element_text(colour = "#000000", face = "bold"),
+  panel.spacing = unit(1, "lines")
+)}
+
+#' Neami ggplot2 dark theme
+#'
+#' The function theme_neami_dark will apply a coherent "Neami" dark theme to a ggplot2 object.
+#'
+#' @export
+#'
+#' @examples
+#' ggplot2::ggplot(mtcars, ggplot2::aes()) + theme_neami_dark()
+theme_neami_dark <- function() {theme(
+  plot.background = element_rect(fill = "#01253B"),
+  panel.background = element_rect(fill = "#01253B"),
+  legend.background = element_rect(fill = "#01253B"),
+  legend.key = element_rect(fill = "#01253B"),
+  line = element_line(colour = "#FFFFFF"),
+  text = element_text(colour = "#FFFFFF", face = "bold", family = "Lexend"),
+  axis.text = element_text(colour = "#FFFFFF"),
+  axis.line = element_line(colour = "#FFFFFF"),
+  panel.grid.major = element_line(linewidth = .1),
+  panel.grid.minor = element_line(linewidth = .05),
+  legend.position = "bottom",
+  strip.background = element_rect(fill = "#4d6676"),
+  strip.text = element_text(colour = "#FFFFFF", face = "bold"),
+  panel.spacing = unit(1, "lines")
+)}
+
 
 #' Neami ggplot2 theme for maps
 #'
@@ -25,8 +62,8 @@ theme_neami <- function() {
 #'  geom_sf(aes(fill = AREA)) + theme_neami_map()
 theme_neami_map <- function() {
   ggplot2::theme_classic() +
-    ggplot2::theme(text = ggplot2::element_text(size = 16, family = "Brandon Text Regular", colour = "#4a4a4a"),
-                   plot.title = ggplot2::element_text(family = "Utopia Std", colour = "#53565a"),
+    ggplot2::theme(text = ggplot2::element_text(size = 16, family = "Arial", colour = "#4a4a4a"),
+                   plot.title = ggplot2::element_text(family = "Arial", colour = "#53565a"),
                    axis.ticks = ggplot2::element_blank(),
                    axis.text = ggplot2::element_blank(),
                    axis.title = ggplot2::element_blank())
@@ -93,7 +130,7 @@ finalise_plot <- function(plot_name,
                           save_filepath=file.path(getwd(), "tmp-nc.png"),
                           width_pixels=640,
                           height_pixels=450,
-                          logo_image_path = system.file("logos/NN.master.Large_nostrap.png", package = "neami")) {
+                          logo_image_path = system.file("logos/Neami_No Tagline_Deep Blue.png", package = "neami")) {
 
   footer <- create_footer(source_name, logo_image_path)
 
