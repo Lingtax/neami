@@ -26,7 +26,9 @@ Imports:
     png,
     purrr,
     RColorBrewer,
+    scales,
     sf,
+    showtext,
     tidyr,
     waffle
 Remotes: bbc/bbplot

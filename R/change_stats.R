@@ -57,9 +57,7 @@ flag_k10_changes <-  function(data, name = name, value = value, levels = c("pre"
 
 
   data %>%
-  tidyr::pivot_wider(names_from = {{name}}, values_from = {{value}}) %>%
-  add_k10_change(pre = .[levels[[1]]], post = .[levels[[2]]]) %>%
-    tidyr::pivot_longer(cols = levels) %>%
-    tidyr::unnest(all_of("k10_change")) %>%
-  dplyr::rename(k10_change = matches(all_of(levels[[2]])))
+    tidyr::pivot_wider(names_from = {{name}}, values_from = {{value}}) %>%
+    add_k10_change(pre = .[[levels[[1]]]], post = .[[levels[[2]]]]) %>%
+    tidyr::pivot_longer(cols = levels)
 }

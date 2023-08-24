@@ -12,7 +12,7 @@
 #' dl <- data.frame(x= rep(c("Pre", "Post"), 20), y = rnorm(40, 25, 8), group = sort(rep(1:20, 2)), colour = sort(rep(LETTERS[1:2], 20)))
 #' dl %>% paired_t_plot(x = x, y = y, group = group, colour = colour)
 paired_t_plot <-  function(data, x, y, group, colour = NULL) {
-  ggplot2::ggplot(data, ggplot2::aes(x = {{x}},
+  ggplot2::ggplot(data, ggplot2::aes(x = factor({{x}}),
                           y = {{y}},
                           group = {{group}}, colour = {{colour}})) +
     ggplot2::stat_summary(ggplot2::aes(group = NULL, colour = NULL),
@@ -21,8 +21,10 @@ paired_t_plot <-  function(data, x, y, group, colour = NULL) {
                           fun.args = list(mult = 1)) +
     ggplot2::geom_point(alpha = .25) +
     ggplot2::geom_line(alpha = .25) +
-    ggplot2::labs(x = "Timepoint", y = "Measure score") #+
-    #neami::theme_neami()
+    ggplot2::labs(x = "Timepoint", y = "Measure score") +
+    neami::theme_neami() +
+    neami::scale_colour_neami_d("core_qual")+
+    hide_x_grid()
 }
 
 

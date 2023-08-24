@@ -13,14 +13,11 @@ knitr::opts_chunk$set(
 )
 ```
 
-# neami
-
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of neami is to support the production of high-quality research and evaluation 
-reports within the organisation. It borrows functionality from the BBC bbplot](https://github.com/bbc/bbplot) package
-and the [ochRe](https://github.com/hollylkirk/ochRe) package. 
+The goal of the neami package is to support the production of high-quality research and evaluation 
+reports within the organisation. 
 
 ## Installation
 
@@ -30,48 +27,42 @@ You can install the development version of neami like so:
 remotes::install_github("Lingtax/neami")
 ```
 
-## Example
+## Examples
 
-This is a basic example which shows you how to solve a common problem:
+A core set of functions exist to support graphs in brand consistent formats. 
 
-```{r example, warning=FALSE}
+```{r theming, warning=FALSE, fig.height=10}
 library(neami)
 library(tibble)
 library(ggplot2)
 library(patchwork)
 ## basic example code
-df <-  tibble(x = 1:8, y = 8:1)
-p1 <- ggplot(df, aes(x, y)) +
-  geom_point()
+df <-  tibble(x = 1:8, y = sample(8:1, 8),  colour = 1)
+p1 <- ggplot(df, aes(x, y, colour = colour)) +
+  geom_line()  +
+  guides(colour = FALSE)
+  
 
-(p1 +labs(title = "Unstyled")) + (p1 +labs(title = "Neami styled") + theme_neami())
+(((p1 + labs(title = "Unstyled"))  + plot_spacer()) / 
+  ((p1 +labs(title = "Neami styled (light)") + theme_neami() + scale_colour_neami_c("core_qual")) +
+  (p1 +labs(title = "Neami styled (dark)") + theme_neami_dark() + scale_colour_neami_c("core_qual_light")) 
+     ))
 ```
 
-
-For final publication, graphs can be finalised with a Neami logo and source of data.
-
-```{r finalise_plot, warning=FALSE}
-p1 <- p1 + labs(title = "A Neami styled plot", 
-                subtitle = "with a subtitle") + theme_neami()
-finalise_plot(p1, source = "Made-up data", save = FALSE)
-```
-
-## Managing fonts. 
-
-Neami standards are in the style guide 
-To enable the fonts, install Utopia Std and Brandon text, then run:
-```{r fonts, eval=FALSE}
-install.packages(extrafont)
-library(extrafont)
-font_import()
-loadfonts(device = "win")
-
-```
-
-Then when you require non-native fonts, simply load the `extrafonts` package.
+Other functions exist to support common analysis and reporting tasks including calculation and reporting of group level change and individual reliable change metrics. 
 
 ```{r}
-library(extrafonts)
+showtext::showtext_auto()
+test <- data.frame(person = 1:30, pre = rnorm(30, 30, 9.2), post = rnorm(30, 22, 9.2))
+
+add_k10_change(test, pre, post) %>% janitor::tabyl(rel_k10_change)
+
+# Caption a t-test 
+caption_ttest(t.test(test$pre, test$post, var.equal = TRUE))
+
+test %>% tidyr::pivot_longer(cols = pre:post) %>% 
+paired_t_plot(x= name, y = value, group = person)
+
 ```
 
-See the [extrafonts github page](https://github.com/wch/extrafont) for more details.
+
