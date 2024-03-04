@@ -11,7 +11,8 @@ finalise_plot(
   save_filepath = file.path(getwd(), "tmp-nc.png"),
   width_pixels = 640,
   height_pixels = 450,
-  logo_image_path = system.file("logos/NN.master.Large_nostrap.png", package = "neami")
+  logo_image_path = system.file("logos/Neami_No Tagline_Deep Blue.png", package =
+    "neami")
 )
 }
 \arguments{

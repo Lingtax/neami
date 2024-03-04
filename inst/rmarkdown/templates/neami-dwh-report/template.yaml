@@ -1,0 +1,4 @@
+name: Neami Data Warehouse Report
+description: >
+   A template to get you started querying the data warehouse
+create_dir: FALSE
