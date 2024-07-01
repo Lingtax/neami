@@ -1,0 +1,4 @@
+name: Neami Targets Report
+description: >
+   A template to get you started working from a targets pipeline
+create_dir: FALSE

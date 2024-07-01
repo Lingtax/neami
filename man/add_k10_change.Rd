@@ -5,6 +5,8 @@
 \title{Calculates reliable change for k10 scores}
 \usage{
 add_k10_change(data, pre, post, pop_sd = 9.2, rel = 0.92)
+
+add_k10_change(data, pre, post, pop_sd = 9.2, rel = 0.92)
 }
 \arguments{
 \item{data}{a dataframe in wide format}
@@ -19,6 +21,8 @@ add_k10_change(data, pre, post, pop_sd = 9.2, rel = 0.92)
 }
 \value{
 the input dataframe with a raw change and a reliable change indicator appended
+
+the input dataframe with a raw change and a reliable change indicator appended
 }
 \description{
 Simple differences in pre- and post- scores risks overinterpreting variation.
@@ -29,8 +33,18 @@ that are attributable to random noise and those that are more systematic.
 This calculation relies on an estimate of the standard deviation (AMHOCN
 estimate 9.2, n =281; Neami intake estimate 8.84, n = 2215) and of scale
 reliability (alpha = .91: https://rdcu.be/cW31L, neami estimate alpha = .92)
+
+Simple differences in pre- and post- scores risks overinterpreting variation.
+Variation in outcome measures are to be expected due to uncontrolled factors
+unrelated to a consumers' actual outcomes. Reliable change indices
+/url(https://ebmh.bmj.com/content/1/3/70) seek to place benchmarks on changes
+that are attributable to random noise and those that are more systematic.
+This calculation relies on an estimate of the standard deviation (ABS SD = 10, N = 10579) and of scale
+reliability (alpha = .91: https://rdcu.be/cW31L, neami estimate alpha = .92)
 }
 \examples{
+data <-  data.frame(person = 1:30, pre = rnorm(30, 30, 9.2), post = rnorm(30, 22, 9.2))
+add_k10_change(data, pre, post)
 data <-  data.frame(person = 1:30, pre = rnorm(30, 30, 9.2), post = rnorm(30, 22, 9.2))
 add_k10_change(data, pre, post)
 }

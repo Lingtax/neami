@@ -3,15 +3,19 @@ title: "Research and Evaluation Report"
 author: "<Your Name> for the R&E team"
 date: "Last compiled on `r format(Sys.time(), '%d %B, %Y')`"
 output: 
-  bookdown::pdf_document2: 
-   reference_docx: "`r system.file("rmarkdown/templates/template-name/skeleton/template.docx", package = "neami")`"
+  neami::html_neami:
+    theme: neami
+    highlight: github
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, dev = "CairoPNG", warning = FALSE, message = FALSE)
 # Put your library calls here 
 library(neami)
-library(ggplot2)
+library(tidyverse)
+library(here)
+library(janitor)
+library(knitr)
 
 ```
 
@@ -28,18 +32,25 @@ your output text, press enter twice.
 ## Level 2 Heading
 
 Code can go in code-chunks, you can invoke a new code chunk by pressing 
-`ctrl-alt-i`. If you then name the chunk (by placing a name after the "{r " at 
-the top, you can make cross-references to the products of the chunk in text, for 
-example, See Figure \@ref(fig:test-plot).
+`ctrl-alt-i`. 
 
 ```{r test-plot, fig.cap="Some test data.", echo=FALSE}
 plt <-  ggplot(chickwts, aes(x = feed, y = weight/100, fill = feed)) +
   geom_jitter() +
   geom_violin(alpha = .5) +
-  scale_colour_neami(discrete = TRUE) +
+  scale_fill_neami_d("blues") +
   labs(x = "Group", y = "Symptoms") +
   theme_neami() +
   theme(legend.position = "none")
-  
-finalise_plot(plt, source = "Carelink+", save = FALSE)
+
+plt
 ```
+
+A chunk that produces a kable
+
+```{r test-table}
+diamonds %>% 
+  tabyl(cut, clarity) %>% 
+  kable(caption = "Example Kable of Diamonds dataset")
+```
+

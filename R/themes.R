@@ -79,8 +79,8 @@ theme_neami_map <- function() {
 #'
 #' @examples
 hide_x_grid <-  function() {
-  theme(panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank())
+  ggplot2::theme(panel.grid.major.x = ggplot2::element_blank(),
+        panel.grid.minor.x = ggplot2::element_blank())
 }
 
 #' Suppress y-axis gridlines
@@ -90,8 +90,8 @@ hide_x_grid <-  function() {
 #'
 #' @examples
 hide_y_grid <-  function() {
-  theme(panel.grid.major.y = element_blank(),
-        panel.grid.minor.y = element_blank())
+  ggplot2::theme(panel.grid.major.y = ggplot2::element_blank(),
+        panel.grid.minor.y = ggplot2::element_blank())
 }
 
 #' Saves a neami themed plot
