@@ -44,5 +44,5 @@ type_convert(tribble(
 4,         1,   "2024-01-21", NA_character_,           1
 
 )) \%>\% 
- compile_episodes(datetimestart, datetimeend, personid, 1L) 
+  compile_episodes(datetimestart, datetimeend, personid, 1L) 
 }
