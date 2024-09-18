@@ -34,9 +34,9 @@ paired_t_plot <-  function(data, x, y, group, colour = NULL, type = NULL) {
                                          y = {{y}},
                                          group = {{group}}, colour = {{colour}})) +
         ggplot2::geom_rect(aes(xmin=xmin, ymin=ymin, xmax= xmax, ymax= ymax, fill = level), alpha =.2, data = rects, inherit.aes = FALSE ) +
-        ggplot2::geom_hline(yintercept = 20, colour = "grey50", alpha = .7,  linetype = "dotted") +
-        ggplot2::geom_hline(yintercept = 25, colour = "grey50", alpha = .7,  linetype = "dashed") +
-        ggplot2::geom_hline(yintercept = 30, colour = "grey50", alpha = .7,  linetype = "longdash") +
+        # ggplot2::geom_hline(yintercept = 20, colour = "grey50", alpha = .7,  linetype = "dotted") +
+        # ggplot2::geom_hline(yintercept = 25, colour = "grey50", alpha = .7,  linetype = "dashed") +
+        # ggplot2::geom_hline(yintercept = 30, colour = "grey50", alpha = .7,  linetype = "longdash") +
         ggplot2::stat_summary(ggplot2::aes(group = NULL, colour = NULL),
                               size = 2,
                               fun.data = ggplot2::mean_sdl,
