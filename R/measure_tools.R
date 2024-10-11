@@ -172,8 +172,8 @@ k5_prep <- function(k5_data) {
 sdq_prep <- function(sdq_data) {
   sdq_data |>
   filter(str_detect(questiontext, "Thank you very much for your help.", negate = TRUE)) |>
-    mutate(questiontext = str_replace(questiontext, "^(?=\\d)", "sqd_q"),
-           questiontext = case_when(str_detect(questiontext, "^sqd_q\\d+") ~ str_extract(questiontext, "^sqd_q\\d+"),
+    mutate(questiontext = str_replace(questiontext, "^(?=\\d)", "sdq_q"),
+           questiontext = case_when(str_detect(questiontext, "^sdq_q\\d+") ~ str_extract(questiontext, "^sdq_q\\d+"),
                                      questiontext == 'Date Completed' ~ "date_complete",
                                      questiontext == 'Measure Completion' ~ "decline_reason",
                                      questiontext == 'Collection Occasion' ~ "collection_reason",
