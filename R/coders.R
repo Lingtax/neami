@@ -78,3 +78,31 @@ code_cald <- function(country_of_birth, main_language) {
                                              "Not Elsewhere Classified") ~ "Unknown",
                    TRUE ~ "Non-CALD community")
 }
+
+
+#' Code PMHC service contact types against reference codes
+#'
+#' @param guid a vector of service contact contact IDs
+#'
+#' @return a vector of contact types
+#' @export
+#'
+#' @examples
+#' code_contacts(c("33A9B8BA-341C-4D25-B5C0-2A7DAE8C8AB6", "73F89E5F-AF10-47DD-B3DC-37018D1DA6A7"))
+code_contacts <-  function(guid) {
+  
+  idx = c("33A9B8BA-341C-4D25-B5C0-2A7DAE8C8AB6" = "Assessment",
+          "73F89E5F-AF10-47DD-B3DC-37018D1DA6A7" = "Suicide prevention specific assistance NEC",
+          "60E0FF71-1E64-494D-8A84-654C7A9187B1" = "Clinical care coordination/liaison",
+          "F674C5F7-CF22-47CF-BEE2-75E7118BB6F0" = "Other psychological intervention",
+          "26EDB0F2-73B5-423B-A5B1-7E1DFBAFE783" = "Cultural specific assistance NEC",
+          "62EB1066-0F3F-44BD-AFBF-B85D5BFA968C" = "Clinical nursing services",
+          "F1229BD0-9D24-4A08-B242-CDC83D9ACDCC" = "Child or youth specific assistance NEC",
+          "664A133A-C615-46BB-847C-D4B2A46FBE08" = "Psychosocial support",
+          "052DA0EF-90F2-4FC7-85D3-D792B55A0C9E" = "No Contact",
+          "85CB0A9C-1874-4F35-ADE1-E464A5E6183E" = "Administration",
+          "0FFE4137-074C-4D81-A52F-E6A422F86F18" = "Structured psychological intervention")
+  
+  idx[guid]
+  
+}
