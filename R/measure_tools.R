@@ -124,7 +124,7 @@ standardise_measures <- function(item, type = "occasion") {
 #' @examples
 prep_measures <-  function(measures, fundings, type){
 
-  if(!(type %in% c("k10", "k5", "sdq", "pmhc"))) errorCondition("Type must be one of 'k10', 'k5', 'sdq', or 'pmhc'")
+  if(!(type %in% c("k10", "k5", "sdq", "pmhc"))) warningCondition("Type is not one of 'k10', 'k5', 'sdq', or 'pmhc'. Minimal prep applied.")
      
   k10_prep <- function(k10_data) {
   k10_data |>
@@ -226,8 +226,7 @@ pmhc_prep <- function(pmhc_form) {
                                                  lubridate::floor_date(date_created, "days")),
                   across(where(is.character), ~ na_if(.,""))) |>
     dplyr::filter(date_complete >= funding_start,
-                  date_complete <= funding_end | is.na(funding_end)) |>
-       distinct(acp_filled_form_id, .keep_all = TRUE) 
+                  date_complete <= funding_end | is.na(funding_end))  
 
   }
 
@@ -322,6 +321,15 @@ pmhc_prep <- function(pmhc_form) {
       step_a(fundings = fundings) |>
       # Custom filters and recodes
       pmhc_prep() |>
+      step_c()
+
+  return(out)
+
+  }
+ 
+   else {
+  out <-  measures |>
+      step_a(fundings = fundings) |>
       step_c()
 
   return(out)
