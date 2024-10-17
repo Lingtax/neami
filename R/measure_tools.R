@@ -212,25 +212,28 @@ pmhc_prep <- function(pmhc_form) {
 
   step_c <- function(measures) {
     measures |>
-    dplyr::mutate(answer = case_when(answer == "" ~ NA_character_,
-                            TRUE ~ answer)) |>
-    tidyr::pivot_wider(id_cols = c(AcpFilledFormId, PersonId, fldservicesrequiredid,
-                                   funding_start, funding_end, fldservicename, version_name, DateCreated),
-                       names_from = questiontext,
-                       values_from = answer,
-                       values_fill = NA) |>
-    readr::type_convert() |>
-    janitor::clean_names()  |>
-    dplyr::mutate(date_complete = dplyr::if_else(!is.na(date_complete),
-                                                 lubridate::dmy(date_complete),
-                                                 lubridate::floor_date(date_created, "days")),
-                  across(where(is.character), ~ na_if(.,""))) |>
-    dplyr::filter(date_complete >= funding_start,
-                  date_complete <= funding_end | is.na(funding_end))  
+      dplyr::mutate(answer = case_when(answer == "" ~ NA_character_,
+                              TRUE ~ answer)) |>
+      dplyr::group_by(AcpFilledFormId, questiontext) |> 
+      dplyr::slice(1) |> 
+      dplyr::ungroup()
+      tidyr::pivot_wider(id_cols = c(AcpFilledFormId, PersonId, fldservicesrequiredid,
+                                     funding_start, funding_end, fldservicename, version_name, DateCreated),
+                         names_from = questiontext,
+                         values_from = answer,
+                         values_fill = NA) |>
+      readr::type_convert() |>
+      janitor::clean_names()  |>
+      dplyr::mutate(date_complete = lubridate::dmy(date_complete),
+                    across(where(is.character), ~ na_if(.,""))) |>
+      dplyr::filter(date_complete >= funding_start,
+                    date_complete <= funding_end | is.na(funding_end))  
 
   }
 
   if (type == "k10") {
+    k10_items <-  paste0("k10_q", 1:10)
+    
   out <-  measures |>
       step_a(fundings = fundings) |>
       # Custom filters and recodes
@@ -241,11 +244,19 @@ pmhc_prep <- function(pmhc_form) {
                   completion_status = case_when(!if_any(starts_with("k10_q"), is.na) ~ "Measure Complete",
                                        !is.na(decline_reason) ~ as.character(decline_reason)),
                   k10_total = case_when(version_name == "K10" | version_name == "K10 - WA SUSD Only" ~ k10_total, 
+                                        !(version_name == "K10" | version_name == "K10 - WA SUSD Only") &
+                                          sum(is.na(c(k10_q1, k10_q2, k10_q3, k10_q4, k10_q5, 
+                                                      k10_q6, k10_q7, k10_q8, k10_q9, k10_q10))) > 1 ~ NA_real_, 
+                                        !(version_name == "K10" | version_name == "K10 - WA SUSD Only") &
+                                          sum(is.na(c(k10_q1, k10_q2, k10_q3, k10_q4, k10_q5, 
+                                                      k10_q6, k10_q7, k10_q8, k10_q9, k10_q10))) == 1 ~ 
+                                          round(sum(k10_q1, k10_q2, k10_q3, k10_q4, k10_q5, 
+                                                    k10_q6, k10_q7, k10_q8, k10_q9, k10_q10, na.rm = TRUE) / 9 * 10, 0),
                                         TRUE ~ k10_q1 + k10_q2 + k10_q3 + k10_q4 + k10_q5 + 
                                           k10_q6 + k10_q7 + k10_q8 + k10_q9 + k10_q10)
                   ) |>
   filter(!if_all(c(completion_status, starts_with("k10_q")), is.na)) |> 
-    select(-decline_reason)
+  select(-decline_reason)
 
   return(out)
 
