@@ -216,7 +216,7 @@ pmhc_prep <- function(pmhc_form) {
                               TRUE ~ answer)) |>
       dplyr::group_by(AcpFilledFormId, questiontext) |> 
       dplyr::slice(1) |> 
-      dplyr::ungroup()
+      dplyr::ungroup() |> 
       tidyr::pivot_wider(id_cols = c(AcpFilledFormId, PersonId, fldservicesrequiredid,
                                      funding_start, funding_end, fldservicename, version_name, DateCreated),
                          names_from = questiontext,
