@@ -129,7 +129,7 @@ prep_measures <-  function(measures, fundings, type){
   k10_prep <- function(k10_data) {
   k10_data |>
   dplyr::filter(!(questiontext %in% c("Episode number", "Over the past...", "(k10) Reference Number", "(k10) Statewide UR number")),
-                str_detect(questiontext, "The score displayed will not be accurate if any questions are not completed.", negate = TRUE)) |>
+                stringr::str_detect(questiontext, "The score displayed will not be accurate if any questions are not completed.", negate = TRUE)) |>
   dplyr::mutate(questiontext = case_when(
     questiontext %in%  c("Overall Score", "Total Score", "(k10)Total K10 score") ~ 'k10_total',
     questiontext %in%  c('About how often did you feel tired out for no good reason?', '1. About how often did you feel tired out for no good reason?') ~ 'k10_q1',
@@ -155,8 +155,8 @@ TRUE ~ questiontext))
 
 k5_prep <- function(k5_data) {
   k5_data |>
-  filter(str_detect(questiontext, "Episode number|If the respondent does not answer any one question, the entire score might be invalidated|score displayed will not be accurate if any questions are not completed", negate = TRUE)) |>
-    mutate(questiontext = case_when(
+    dplyr::filter(stringr::str_detect(questiontext, "Episode number|If the respondent does not answer any one question, the entire score might be invalidated|score displayed will not be accurate if any questions are not completed", negate = TRUE)) |>
+    dplyr::mutate(questiontext = dplyr::case_when(
     questiontext == 'Date Completed' ~ "date_complete",
     questiontext == 'Collection Occasion - Reason' ~ "collection_reason",
     questiontext == 'Overall Score' ~ "k5_total",
@@ -171,15 +171,15 @@ k5_prep <- function(k5_data) {
 
 sdq_prep <- function(sdq_data) {
   sdq_data |>
-  filter(str_detect(questiontext, "Thank you very much for your help.", negate = TRUE)) |>
-    mutate(questiontext = str_replace(questiontext, "^(?=\\d)", "sdq_q"),
-           questiontext = case_when(str_detect(questiontext, "^sdq_q\\d+") ~ str_extract(questiontext, "^sdq_q\\d+"),
+    dplyr::filter(stringr::str_detect(questiontext, "Thank you very much for your help.", negate = TRUE)) |>
+    dplyr::mutate(questiontext = stringr::str_replace(questiontext, "^(?=\\d)", "sdq_q"),
+           questiontext = dplyr::case_when(stringr::str_detect(questiontext, "^sdq_q\\d+") ~ stringr::str_extract(questiontext, "^sdq_q\\d+"),
                                      questiontext == 'Date Completed' ~ "date_complete",
                                      questiontext == 'Measure Completion' ~ "decline_reason",
                                      questiontext == 'Collection Occasion' ~ "collection_reason",
                                      questiontext == 'Total Score - ' ~ 'sdq_total',
                                      TRUE ~ questiontext),
-           answer = case_when(questiontext %in%
+           answer = dplyr::case_when(questiontext %in%
                               paste0("sdq_q", c(1:6, 8:10, 12:13, 15:20, 22:24)) ~
                               as.character(sdq_coder(answer, type = "tf", reverse = FALSE)),
                             questiontext %in%
@@ -193,7 +193,7 @@ sdq_prep <- function(sdq_data) {
 pmhc_prep <- function(pmhc_form) {
   pmhc_form |>
   # filter() |>
-    mutate(questiontext = case_when(questiontext == 'Date completed' ~ "date_complete",
+    dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date completed' ~ "date_complete",
                                     TRUE ~ questiontext)
          )
 }
@@ -319,10 +319,10 @@ pmhc_prep <- function(pmhc_form) {
                                                        sum((c(sdq_q1, sdq_q4, sdq_q9, sdq_q17, sdq_q20) %in% 0:2), na.rm = TRUE) == 3 ~ round(sum(c(sdq_q1, sdq_q4, sdq_q9, sdq_q17, sdq_q20) / 3 *5), 0),
                                                        sum((c(sdq_q1, sdq_q4, sdq_q9, sdq_q17, sdq_q20) %in% 0:2), na.rm = TRUE) == 4 ~ round(sum(c(sdq_q1, sdq_q4, sdq_q9, sdq_q17, sdq_q20) / 4 *5), 0),
                                                        TRUE ~ sdq_q1 + sdq_q4 + sdq_q9 + sdq_q17 + sdq_q20),
-                  sdq_total = case_when(sum(is.na(c(emotional_symptoms_summary_score, conduct_problem_summary_score,  peer_problem_summary_score, hyperactivity_summary_score))) == 1 ~ sum(c(emotional_symptoms_summary_score, conduct_problem_summary_score,  peer_problem_summary_score, hyperactivity_summary_score), na.rm = TRUE) / 3 * 4,
-                                        TRUE ~ emotional_symptoms_summary_score + conduct_problem_summary_score +  peer_problem_summary_score + hyperactivity_summary_score)
+                  sdq_total = round(case_when(sum(is.na(c(emotional_symptoms_summary_score, conduct_problem_summary_score,  peer_problem_summary_score, hyperactivity_summary_score))) == 1 ~ sum(c(emotional_symptoms_summary_score, conduct_problem_summary_score,  peer_problem_summary_score, hyperactivity_summary_score), na.rm = TRUE) / 3 * 4,
+                                        TRUE ~ emotional_symptoms_summary_score + conduct_problem_summary_score +  peer_problem_summary_score + hyperactivity_summary_score), 0)
                   ) |>
-    dplyr::ungroup()
+    dplyr::ungroup() |> 
     dplyr::filter(!if_all(c(completion_status, starts_with("sdq_q")), is.na)) |> 
     dplyr::select(-decline_reason)
 
