@@ -242,21 +242,23 @@ pmhc_prep <- function(pmhc_form) {
     dplyr::mutate(#custom scoring
                   across(starts_with("k10_q"), k10_coder),
                   completion_status = case_when(!if_any(starts_with("k10_q"), is.na) ~ "Measure Complete",
-                                       !is.na(decline_reason) ~ as.character(decline_reason)),
-                  k10_total = case_when(version_name == "K10" | version_name == "K10 - WA SUSD Only" ~ k10_total, 
-                                        !(version_name == "K10" | version_name == "K10 - WA SUSD Only") &
-                                          sum(is.na(c(k10_q1, k10_q2, k10_q3, k10_q4, k10_q5, 
-                                                      k10_q6, k10_q7, k10_q8, k10_q9, k10_q10))) > 1 ~ NA_real_, 
-                                        !(version_name == "K10" | version_name == "K10 - WA SUSD Only") &
-                                          sum(is.na(c(k10_q1, k10_q2, k10_q3, k10_q4, k10_q5, 
-                                                      k10_q6, k10_q7, k10_q8, k10_q9, k10_q10))) == 1 ~ 
-                                          round(sum(k10_q1, k10_q2, k10_q3, k10_q4, k10_q5, 
-                                                    k10_q6, k10_q7, k10_q8, k10_q9, k10_q10, na.rm = TRUE) / 9 * 10, 0),
-                                        TRUE ~ k10_q1 + k10_q2 + k10_q3 + k10_q4 + k10_q5 + 
-                                          k10_q6 + k10_q7 + k10_q8 + k10_q9 + k10_q10)
-                  ) |>
-  filter(!if_all(c(completion_status, starts_with("k10_q")), is.na)) |> 
-  select(-decline_reason)
+                                       !is.na(decline_reason) ~ as.character(decline_reason))) |> 
+    dplyr::rowwise() |> 
+    dplyr::mutate(missing_items = sum(is.na(c(k10_q1, k10_q2, k10_q3, k10_q4, k10_q5, 
+                                       k10_q6, k10_q7, k10_q8, k10_q9, k10_q10))),
+           k10_total = case_when(version_name == "K10" | version_name == "K10 - WA SUSD Only" ~ k10_total, 
+                                 !(version_name == "K10" | version_name == "K10 - WA SUSD Only") &
+                                   missing_items > 1 ~ NA_real_, 
+                                 !(version_name == "K10" | version_name == "K10 - WA SUSD Only") &
+                                   missing_items == 1 ~ 
+                                   round(sum(c(k10_q1, k10_q2, k10_q3, k10_q4, k10_q5, 
+                                               k10_q6, k10_q7, k10_q8, k10_q9, k10_q10), na.rm = TRUE) / 9 * 10, 0),
+                                 TRUE ~ k10_q1 + k10_q2 + k10_q3 + k10_q4 + k10_q5 + 
+                                   k10_q6 + k10_q7 + k10_q8 + k10_q9 + k10_q10)
+    ) |>
+  dplyr::ungroup() |> 
+  dplyr::filter(!if_all(c(completion_status, starts_with("k10_q")), is.na)) |> 
+  dplyr::select(-decline_reason, -missing_items)
 
   return(out)
 
@@ -290,9 +292,9 @@ pmhc_prep <- function(pmhc_form) {
       step_c() |>
     dplyr::mutate(collection_reason = standardise_measures(collection_reason, "occasion"),
                   completion_status = case_when(!if_any(starts_with("sdq_q"), is.na) ~ "Measure Complete",
-                                       !is.na(decline_reason) ~ decline_reason),
-                  
-                  emotional_symptoms_summary_score = case_when(sum((c(sdq_q3, sdq_q8,  sdq_q13,  sdq_q16, sdq_q24) %in% 0:2), na.rm = TRUE) < 3 ~ NA_real_,
+                                       !is.na(decline_reason) ~ decline_reason)) |> 
+    dplyr::rowwise() |> 
+    dplyr::mutate(emotional_symptoms_summary_score = case_when(sum((c(sdq_q3, sdq_q8,  sdq_q13,  sdq_q16, sdq_q24) %in% 0:2), na.rm = TRUE) < 3 ~ NA_real_,
                                                                sum((c(sdq_q3, sdq_q8,  sdq_q13,  sdq_q16, sdq_q24) %in% 0:2), na.rm = TRUE) == 3 ~ round(sum(c(sdq_q3, sdq_q8,  sdq_q13,  sdq_q16, sdq_q24)/3 *5), 0),
                                                                sum((c(sdq_q3, sdq_q8,  sdq_q13,  sdq_q16, sdq_q24) %in% 0:2), na.rm = TRUE) == 4 ~ round(sum(c(sdq_q3, sdq_q8,  sdq_q13,  sdq_q16, sdq_q24)/4 *5), 0),
                                                                TRUE ~ sdq_q3 + sdq_q8 + sdq_q13 + sdq_q16 + sdq_q24),
@@ -320,8 +322,9 @@ pmhc_prep <- function(pmhc_form) {
                   sdq_total = case_when(sum(is.na(c(emotional_symptoms_summary_score, conduct_problem_summary_score,  peer_problem_summary_score, hyperactivity_summary_score))) == 1 ~ sum(c(emotional_symptoms_summary_score, conduct_problem_summary_score,  peer_problem_summary_score, hyperactivity_summary_score), na.rm = TRUE) / 3 * 4,
                                         TRUE ~ emotional_symptoms_summary_score + conduct_problem_summary_score +  peer_problem_summary_score + hyperactivity_summary_score)
                   ) |>
-    filter(!if_all(c(completion_status, starts_with("sdq_q")), is.na)) |> 
-    select(-decline_reason)
+    dplyr::ungroup()
+    dplyr::filter(!if_all(c(completion_status, starts_with("sdq_q")), is.na)) |> 
+    dplyr::select(-decline_reason)
 
     return(out)
 
