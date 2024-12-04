@@ -10,7 +10,10 @@
 #' @examples
 #' list_periods(ymd("2024-06-01"), Sys.Date())
 list_periods <-  function(from, to, by = "month") {
-  seq(lubridate::floor_date(from, by), to, by = by)
+  if(from == to) { lubridate::floor_date(from, by)
+    } else {
+    seq(lubridate::floor_date(from, by), to, by = by)
+  }
 }
 
 #' Extend a dataframe over arbitrary time units
