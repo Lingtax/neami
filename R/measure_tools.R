@@ -224,6 +224,7 @@ pmhc_prep <- function(pmhc_form) {
                          values_fill = NA) |>
       readr::type_convert() |>
       janitor::clean_names()  |>
+      bind_rows(tibble(date_complete = character())) |> 
       dplyr::mutate(date_complete = lubridate::dmy(date_complete),
                     across(where(is.character), ~ na_if(.,""))) |>
       dplyr::filter(date_complete >= funding_start,
