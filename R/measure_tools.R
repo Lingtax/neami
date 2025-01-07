@@ -214,7 +214,7 @@ pmhc_prep <- function(pmhc_form) {
     measures |>
       dplyr::mutate(answer = case_when(answer == "" ~ NA_character_,
                               TRUE ~ answer)) |>
-      dplyr::group_by(AcpFilledFormId, questiontext) |> 
+      dplyr::group_by(AcpFilledFormId,fldservicesrequiredid, questiontext) |> 
       dplyr::slice(1) |> 
       dplyr::ungroup() |> 
       tidyr::pivot_wider(id_cols = c(AcpFilledFormId, PersonId, fldservicesrequiredid,
