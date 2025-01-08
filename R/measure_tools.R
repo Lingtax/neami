@@ -224,7 +224,10 @@ pmhc_prep <- function(pmhc_form) {
                          values_fill = NA) |>
       readr::type_convert() |>
       janitor::clean_names()  |>
-      bind_rows(tibble(date_complete = character())) |> 
+      bind_rows(tibble(date_complete = character(),
+                       collection_reason = character(),
+                       completion_status = character(), 
+                       decline_reason = character())) |> 
       dplyr::mutate(date_complete = lubridate::dmy(date_complete),
                     across(where(is.character), ~ na_if(.,""))) |>
       dplyr::filter(date_complete >= funding_start,
@@ -294,6 +297,16 @@ pmhc_prep <- function(pmhc_form) {
     dplyr::mutate(collection_reason = standardise_measures(collection_reason, "occasion"),
                   completion_status = case_when(!if_any(starts_with("sdq_q"), is.na) ~ "Measure Complete",
                                        !is.na(decline_reason) ~ decline_reason)) |> 
+    bind_rows(tibble(
+      sdq_q1 = integer(), sdq_q2 = integer(), sdq_q3 = integer(), 
+      sdq_q4 = integer(), sdq_q5 = integer(), sdq_q6 = integer(), 
+      sdq_q7 = integer(), sdq_q8 = integer(), sdq_q9 = integer(), 
+      sdq_q10 = integer(), sdq_q11 = integer(), sdq_q12 = integer(), 
+      sdq_q13 = integer(), sdq_q14 = integer(), sdq_q15 = integer(), 
+      sdq_q16 = integer(), sdq_q17 = integer(), sdq_q18 = integer(), 
+      sdq_q19 = integer(), sdq_q20 = integer(), sdq_q21 = integer(), 
+      sdq_q22 = integer(), sdq_q23 = integer(), sdq_q24 = integer(), 
+      sdq_q25 = integer())) |> 
     dplyr::rowwise() |> 
     dplyr::mutate(emotional_symptoms_summary_score = case_when(sum((c(sdq_q3, sdq_q8,  sdq_q13,  sdq_q16, sdq_q24) %in% 0:2), na.rm = TRUE) < 3 ~ NA_real_,
                                                                sum((c(sdq_q3, sdq_q8,  sdq_q13,  sdq_q16, sdq_q24) %in% 0:2), na.rm = TRUE) == 3 ~ round(sum(c(sdq_q3, sdq_q8,  sdq_q13,  sdq_q16, sdq_q24)/3 *5), 0),
