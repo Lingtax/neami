@@ -2,6 +2,8 @@
 
 export("%>%")
 export(add_k10_change)
+export(add_k5_change)
+export(add_rasds_change)
 export(bin_age_10)
 export(bounding_box)
 export(caption_ttest)
