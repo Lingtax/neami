@@ -124,7 +124,7 @@ standardise_measures <- function(item, type = "occasion") {
 #' @examples
 prep_measures <-  function(measures, fundings, type){
 
-  if(!(type %in% c("k10", "k5", "sdq", "pmhc"))) warningCondition("Type is not one of 'k10', 'k5', 'sdq', or 'pmhc'. Minimal prep applied.")
+  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar"))) warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', or 'stsh'. Minimal prep applied.")
      
   k10_prep <- function(k10_data) {
   k10_data |>
@@ -197,9 +197,23 @@ pmhc_prep <- function(pmhc_form) {
                                     TRUE ~ questiontext)
          )
 }
+stsh_prep <- function(stsh_form) {
+  stsh_form |>
+  # filter() |>
+    dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date completed:' ~ "date_complete",
+                                                  questiontext == 'Date this form was completed:' ~ "date_complete",
+                                                  questiontext == 'Date this form was completed ' ~ "date_complete",
+                                    TRUE ~ questiontext)
+         )
+}
 
-
-
+iar_prep <- function(iar_form) {
+  iar_form |>
+  # filter() |>
+    dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                  TRUE ~ questiontext)
+         )
+}
 
 
   step_a <-  function(measures, fundings) {
@@ -353,6 +367,26 @@ pmhc_prep <- function(pmhc_form) {
 
   return(out)
 
+  }
+  if (type == "stsh") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      stsh_prep() |>
+      step_c()
+    
+    return(out)
+    
+  }
+  if (type == "iar") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      iar_prep() |>
+      step_c()
+    
+    return(out)
+    
   }
  
    else {
