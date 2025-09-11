@@ -15,7 +15,7 @@ code_cald(country_of_birth, main_language)
 a vector of cald statuses
 }
 \description{
-Defininc CALD communities is difficult. Per Pham et al. (2021), 
+Defining CALD communities is difficult. Per Pham et al. (2021), 
 for routine data projects, Neami presumes consumers come from a 
 Culturally or Linguistically Diverse Community if their Main 
 language is not English and their country of Birth is not an 

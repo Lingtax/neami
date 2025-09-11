@@ -4,14 +4,12 @@
 \alias{neami_waffle}
 \title{Makes an opinionated waffleplot}
 \usage{
-neami_waffle(data, count_var, rows = 5, palette = "Set2")
+neami_waffle(data, count_var, rows = NULL, palette = "Set2")
 }
 \arguments{
 \item{data}{a dataframe}
 
 \item{count_var}{a bare variable name indicating the column to be counted}
-
-\item{rows}{an integer of the number of output rows}
 
 \item{palette}{a ggplot2 compatable palette}
 }

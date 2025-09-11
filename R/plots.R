@@ -80,22 +80,33 @@ paired_t_plot <-  function(data, x, y, group, colour = NULL, type = NULL) {
 #'
 #' @param data a dataframe
 #' @param count_var a bare variable name indicating the column to be counted
-#' @param rows an integer of the number of output rows
 #' @param palette a ggplot2 compatable palette
 #'
 #' @export
 #'
 #' @examples
 #' neami_waffle(mtcars, cyl)
-neami_waffle <- function(data, count_var, rows = 5, palette = "Set2") {
-
-  waf_dat <- data %>%
-    tidyr::drop_na({{count_var}}) %>%
-    dplyr::group_by({{count_var}}) %>%
-    dplyr::summarise(count = dplyr::n()) %>%
-    dplyr::pull(count, name = {{count_var}})
-
-  waffle::waffle(waf_dat,rows = rows, xlab = '1 Square = 1 Consumer',
-                 colors = RColorBrewer::brewer.pal(8, palette)[seq_along(waf_dat)])
-
+neami_waffle <- function(data, count_var, rows = NULL, palette = "Set2") {
+  
+  if(!is.null(rows)) {warning("The rows argument is deprecated.")}
+  
+  data |> 
+    tidyr::drop_na({{count_var}}) |>
+    dplyr::group_by({{count_var}}) |>
+    dplyr::summarise(count = dplyr::n()) |>
+    dplyr::mutate({{count_var}} := as.factor({{count_var}}), 
+                  pct = count / sum(count), 
+                  pct = as.integer(smart_round(pct, 1) * 100L)) |> 
+    dplyr::select(-count) |> 
+    tidyr::uncount(pct) |> 
+    dplyr::bind_cols(expand_grid(y = 1:10, x = 1:10)) |> 
+    ggplot2::ggplot(aes(x, y, fill = {{count_var}})) + 
+    ggplot2::geom_tile(colour = "white") + 
+    ggplot2::coord_equal() +
+    ggplot2::scale_fill_brewer(palette = palette) + 
+    ggplot2::theme_void() +
+    ggplot2::labs(caption = "1 Square = 1 percent") +
+    ggplot2::theme(legend.position = "bottom", plot.caption.position = "panel") 
+  
+  
 }
