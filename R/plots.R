@@ -90,6 +90,15 @@ neami_waffle <- function(data, count_var, rows = NULL, palette = "Set2") {
   
   if(!is.null(rows)) {warning("The rows argument is deprecated.")}
   
+  smart_round <- function(x, digits = 0) { # somewhere on SO
+    up <- 10 ^ digits
+    x <- x * up
+    y <- floor(x)
+    indices <- tail(order(x-y), round(sum(x)) - sum(y))
+    y[indices] <- y[indices] + 1
+    y / up
+  }
+  
   data |> 
     tidyr::drop_na({{count_var}}) |>
     dplyr::group_by({{count_var}}) |>
