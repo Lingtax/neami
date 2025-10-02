@@ -1,6 +1,6 @@
 #' Codes Persons into CALD status
 #' 
-#' Defininc CALD communities is difficult. Per Pham et al. (2021), 
+#' Defining CALD communities is difficult. Per Pham et al. (2021), 
 #' for routine data projects, Neami presumes consumers come from a 
 #' Culturally or Linguistically Diverse Community if their Main 
 #' language is not English and their country of Birth is not an 

@@ -124,7 +124,7 @@ standardise_measures <- function(item, type = "occasion") {
 #' @examples
 prep_measures <-  function(measures, fundings, type){
 
-  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar"))) warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', or 'stsh'. Minimal prep applied.")
+  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp"))) warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp' or 'stsh'. Minimal prep applied.")
      
   k10_prep <- function(k10_data) {
   k10_data |>
@@ -213,6 +213,19 @@ iar_prep <- function(iar_form) {
     dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
                                                   TRUE ~ questiontext)
          )
+}
+
+amhcgp_prep <- function(amhcgp_form) {
+  amhcgp_form |>
+    # filter() |>
+    dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                  TRUE ~ questiontext) 
+    ) |> 
+    dplyr::mutate(questiontext = case_when(row_number() == 1 ~ "dr_title", 
+                                           row_number() == 2 ~ "dr_forename", 
+                                           row_number() == 3 ~ "dr_surname", 
+                                           TRUE ~ questiontext),
+                  .by = c(AcpFilledFormId, fldservicesrequiredid))
 }
 
 
@@ -384,6 +397,17 @@ iar_prep <- function(iar_form) {
       # Custom filters and recodes
       iar_prep() |>
       step_c()
+    
+    return(out)
+    
+  }
+  if (type == "amhc_gp") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      amhcgp_prep() |>
+      step_c() |> 
+      unite(gp, c(dr_title, dr_forename, dr_surname), sep = " ") 
     
     return(out)
     
