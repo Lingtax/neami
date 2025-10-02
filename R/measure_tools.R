@@ -273,7 +273,8 @@ amhcgp_prep <- function(amhcgp_form) {
     dplyr::mutate(#custom scoring
                   across(starts_with("k10_q"), k10_coder),
                   completion_status = case_when(!if_any(starts_with("k10_q"), is.na) ~ "Measure Complete",
-                                       !is.na(decline_reason) ~ as.character(decline_reason))) |> 
+                                       !is.na(decline_reason) ~ as.character(decline_reason), 
+                                       TRUE ~ "Measure incomplete")) |> 
     dplyr::rowwise() |> 
     dplyr::mutate(missing_items = sum(is.na(c(k10_q1, k10_q2, k10_q3, k10_q4, k10_q5, 
                                        k10_q6, k10_q7, k10_q8, k10_q9, k10_q10))),
@@ -304,7 +305,8 @@ amhcgp_prep <- function(amhcgp_form) {
     dplyr::mutate(#custom scoring
                   across(starts_with("k5_q"), k10_coder),
                   completion_status = case_when(!if_any(starts_with("k5_q"), is.na) ~ "Measure Complete",
-                                                !is.na(decline_reason) ~ as.character(decline_reason)),
+                                                !is.na(decline_reason) ~ as.character(decline_reason), 
+                                                TRUE ~ "Measure incomplete"),
                   k5_total = k5_q1 + k5_q2 + k5_q3 + k5_q4 + k5_q5
                   ) |>
                   filter(!if_all(c(completion_status, starts_with("k5_q")), is.na))|> 
@@ -323,7 +325,8 @@ amhcgp_prep <- function(amhcgp_form) {
       step_c() |>
     dplyr::mutate(collection_reason = standardise_measures(collection_reason, "occasion"),
                   completion_status = case_when(!if_any(starts_with("sdq_q"), is.na) ~ "Measure Complete",
-                                       !is.na(decline_reason) ~ decline_reason)) |> 
+                                       !is.na(decline_reason) ~ decline_reason, 
+                                       TRUE ~ "Measure incomplete")) |> 
     bind_rows(tibble(
       sdq_q1 = integer(), sdq_q2 = integer(), sdq_q3 = integer(), 
       sdq_q4 = integer(), sdq_q5 = integer(), sdq_q6 = integer(), 
