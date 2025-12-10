@@ -166,13 +166,7 @@ k5_prep <- function(k5_data) {
     questiontext %in% c('3. In the last 4 weeks, about how often did you feel restless or jumpy?', 'In the last 4 weeks, about how often did you feel restless or jumpy?') ~ "k5_q3",
     questiontext %in% c('4. In the last 4 weeks, about how often did you feel everything was an effort?', 'In the last 4 weeks, about how often did you feel everything was an effort?') ~ "k5_q4",
     questiontext %in% c('5. In the last 4 weeks, about how often did you feel so sad that nothing could cheer you up?', 'In the last 4 weeks, about how often did you feel so sad that nothing could cheer you up?') ~ "k5_q5",
-    TRUE ~ questiontext) ) |> 
-    dplyr::bind_rows(tibble::tibble(
-      k5_q1 = integer(), 
-      k5_q2 = integer(), 
-      k5_q3 = integer(), 
-      k5_q4 = integer(), 
-      k5_q5 = integer()))
+    TRUE ~ questiontext) ) 
 }
 
 sdq_prep <- function(sdq_data) {
@@ -307,7 +301,13 @@ amhcgp_prep <- function(amhcgp_form) {
     step_a(fundings = fundings) |>
     # Custom filters and recodes
       k5_prep() |>
-    step_c() |>
+    step_c() |> 
+    dplyr::bind_rows(tibble::tibble(
+      k5_q1 = integer(), 
+      k5_q2 = integer(), 
+      k5_q3 = integer(), 
+      k5_q4 = integer(), 
+      k5_q5 = integer())) |>
     dplyr::mutate(#custom scoring
                   across(starts_with("k5_q"), k10_coder),
                   completion_status = case_when(!if_any(starts_with("k5_q"), is.na) ~ "Measure Complete",
