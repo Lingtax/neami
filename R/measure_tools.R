@@ -416,6 +416,10 @@ amhcgp_prep <- function(amhcgp_form) {
       # Custom filters and recodes
       amhcgp_prep() |>
       step_c() |> 
+      dplyr::bind_rows(tibble::tibble(
+        dr_title = character(), 
+        dr_forename = character(), 
+        dr_surname = character())) |>
       unite(gp, c(dr_title, dr_forename, dr_surname), sep = " ") 
     
     return(out)
