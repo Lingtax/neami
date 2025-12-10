@@ -303,11 +303,11 @@ amhcgp_prep <- function(amhcgp_form) {
       k5_prep() |>
     step_c() |> 
     dplyr::bind_rows(tibble::tibble(
-      k5_q1 = integer(), 
-      k5_q2 = integer(), 
-      k5_q3 = integer(), 
-      k5_q4 = integer(), 
-      k5_q5 = integer())) |>
+      k5_q1 = character(), 
+      k5_q2 = character(), 
+      k5_q3 = character(), 
+      k5_q4 = character(), 
+      k5_q5 = character())) |>
     dplyr::mutate(#custom scoring
                   across(starts_with("k5_q"), k10_coder),
                   completion_status = case_when(!if_any(starts_with("k5_q"), is.na) ~ "Measure Complete",
