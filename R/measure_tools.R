@@ -166,7 +166,7 @@ k5_prep <- function(k5_data) {
     questiontext %in% c('3. In the last 4 weeks, about how often did you feel restless or jumpy?', 'In the last 4 weeks, about how often did you feel restless or jumpy?') ~ "k5_q3",
     questiontext %in% c('4. In the last 4 weeks, about how often did you feel everything was an effort?', 'In the last 4 weeks, about how often did you feel everything was an effort?') ~ "k5_q4",
     questiontext %in% c('5. In the last 4 weeks, about how often did you feel so sad that nothing could cheer you up?', 'In the last 4 weeks, about how often did you feel so sad that nothing could cheer you up?') ~ "k5_q5",
-    TRUE ~ questiontext)) 
+    TRUE ~ questiontext))
     
 }
 
