@@ -54,8 +54,7 @@ k10_coder <- function(item) {
             "A little of the time" = 2L, 
             "Some of the time" = 3L, 
             "Most of the time" = 4L, 
-            "All of the time"  = 5L, 
-            "" = NA_integer_)
+            "All of the time"  = 5L)
   
   
   return(idx[item])
@@ -81,8 +80,8 @@ ras_coder <- function(item) {
   idx <- c("Untrue" = 1L, 
            "A bit True" = 2L, 
            "Mostly True" = 3L, 
-           "Completely True  " = 4L, 
-           "" = 0L, 
+           "Completely True" = 4L, 
+           # "" = 0L, 
            " " = 0L)
   
   
