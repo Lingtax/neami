@@ -162,7 +162,7 @@ standardise_measures <- function(item, type = "occasion") {
 #' @examples
 prep_measures <-  function(measures, fundings, type){
   
-  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "ras"))) warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp' or 'stsh'. Minimal prep applied.")
+  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "ras", "lcq"))) warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp' or 'stsh'. Minimal prep applied.")
   
   k10_prep <- function(k10_data) {
     k10_data |>
@@ -243,6 +243,21 @@ prep_measures <-  function(measures, fundings, type){
                                                     questiontext == 'Collection Occasion' ~ "collection_reason",
                                                     TRUE ~ questiontext),
                     answer = dplyr::case_when(str_detect(questiontext, "\\d+\\.") ~ as.character(ras_coder(answer)),
+                                              TRUE ~ as.character(answer))
+      )
+  }
+  lcq_prep <- function(lcq_data) {
+    lcq_data |>
+      dplyr::filter(
+        questiontext == "Completion Date" | 
+          stringr::str_detect(questiontext, 
+                     "^Amount of time|Living situation rating|Physical health_1|^Get support|^Hopefulness|^Part of group/community|^Wellbeing|^Achieve important things|^Happiness") 
+        ) |>
+      dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Completion Date' ~ "date_complete",
+                                                    TRUE ~ questiontext),
+                    answer = dplyr::case_when(stringr::str_detect(questiontext, 
+                                                                  "^Amount of time|Living situation rating|Physical health_1|^Get support|^Hopefulness|^Part of group/community|^Wellbeing|^Achieve important things|^Happiness")  ~ 
+                                                str_extract(answer, "\\d"),
                                               TRUE ~ as.character(answer))
       )
   }
@@ -480,6 +495,18 @@ prep_measures <-  function(measures, fundings, type){
         dr_surname = character())) |>
       unite(gp, c(dr_title, dr_forename, dr_surname), sep = " ") 
     
+    return(out)
+    
+  }
+  if (type == "lcq") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      lcq_prep() |>
+      step_c() |> 
+      mutate(across(.cols = matches("^amount_of_time|living_situation_rating|physical_health_1"), ~as.integer(.x)), 
+             total_overall = get_support + hopefulness + part_of_group_community + wellbeing + achieve_important_things + happiness)
+     
     return(out)
     
   }
