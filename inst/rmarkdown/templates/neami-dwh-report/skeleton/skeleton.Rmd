@@ -21,6 +21,7 @@ library(janitor)
 library(knitr)
 library(DBI)
 library(glue)
+library(tt)
 
 # Insert database / data warehouse connection here
 # con <- dbConnect(odbc::odbc(), Driver = "SQL Server", Server = "", 
