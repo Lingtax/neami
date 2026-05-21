@@ -302,8 +302,19 @@ prep_measures <-  function(measures, fundings, type){
   
   
   step_a <-  function(measures, fundings) {
-    measures |>
-      dplyr::inner_join(fundings, by = c("PersonId" = "fldpersonid")) |>
+    a <-  measures |>
+      dplyr::inner_join(fundings, by = c("PersonId" = "fldpersonid")) 
+    
+    a |>
+      filter(questiontext == "Area of Support Focus") |> 
+      group_by(AcpFilledFormId) |>
+      mutate(questiontext = case_when(!is.na(answer) ~ paste0("aos_", stringr::str_to_snake(answer)), 
+                                      TRUE ~ questiontext),
+             answer = case_when(!is.na(answer) ~ "TRUE", 
+                                TRUE ~ answer)
+      ) |> 
+      ungroup() |> 
+      bind_rows(filter(a, questiontext != "Area of Support Focus")) |>
       dplyr::group_by(AcpFilledFormId, questiontext) |>
       dplyr::filter(answer_modified_date == max(answer_modified_date) | is.na(answer_modified_date)) |>
       dplyr::ungroup()
