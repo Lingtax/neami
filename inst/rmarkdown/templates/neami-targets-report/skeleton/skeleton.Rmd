@@ -20,7 +20,7 @@ library(janitor)
 library(here)
 library(knitr)
 library(neami)
-library(tt)
+library(tinytable)
 
 tar_load_everything(store = here("_targets"))
 
