@@ -299,6 +299,29 @@ prep_measures <-  function(measures, fundings, type){
                                              TRUE ~ questiontext),
                     .by = c(AcpFilledFormId, fldservicesrequiredid))
   }
+  sn_prep <- function(sn_form) {
+    
+    form_complete <- sn_form |>
+      # filter() |>
+      dplyr::filter(questiontext %in% c("What aspects of the consumer’s narrative did they express as (or did you perceive as) being important in understanding the past and/or present factors that may impact safety?",
+                                 "Will outreach support be provided to the consumer?",
+                                 "What can be done and who will do what to create, maintain, or strengthen opportunities for safety?",
+                                 "What would the consumer expect staff to know if things were not going well for them, and what would they want staff to do?",
+                                 "What are the strengths, priorities, and opportunities the consumer has identified?",
+                                 "What are the safety considerations the consumer and worker identified as important to talk about and how does the consumer make sense of them?")) |> 
+      dplyr::summarise(complete = sum(is.na(answer)) == 0, 
+                .by = c(AcpFilledFormId, PersonId, DateCreated, OriginalName, version_name, answer_modified_date)) |> 
+      tidyr::pivot_longer(complete, names_to = "questiontext", values_to = "answer") |> 
+      dplyr::mutate(answer = as.character(answer))
+    
+    sn_form |> 
+      dplyr::filter(questiontext  == 'Date Completed') |> 
+      dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                    TRUE ~ questiontext) 
+      ) |> 
+      dplyr::bind_rows(form_complete) 
+    
+  }
   
   
   step_a <-  function(measures, fundings) {
