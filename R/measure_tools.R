@@ -591,7 +591,7 @@ prep_measures <-  function(measures, fundings, type){
       step_c() |> 
       dplyr::relocate(goal_area, start_date, start_rating, 
                       review_date, review_rating, 
-                      end_date, end_rating, end_goal_staus,  
+                      end_date, end_rating, end_goal_status,  
                       .after = everything())
      
     return(out)
