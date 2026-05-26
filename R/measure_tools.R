@@ -162,7 +162,9 @@ standardise_measures <- function(item, type = "occasion") {
 #' @examples
 prep_measures <-  function(measures, fundings, type){
   
-  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "ras", "lcq"))) warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp' or 'stsh'. Minimal prep applied.")
+  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "ras", "lcq", "sn", "isp"))) {
+    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp', 'lcq', 'sn', 'isp', or 'stsh'. Minimal prep applied.")
+    }
   
   k10_prep <- function(k10_data) {
     k10_data |>
@@ -299,6 +301,24 @@ prep_measures <-  function(measures, fundings, type){
                                              TRUE ~ questiontext),
                     .by = c(AcpFilledFormId, fldservicesrequiredid))
   }
+  
+  isp_prep <- function(isp_form) {
+    isp_form |>
+      filter(SectionName == "Goal Setting" | questiontext == 'Date Completed', 
+             !questiontext %in% c("Planned Supports (Will/Way Forward)", 
+                                  "Barriers and Strengths (Reality)", 
+                                  "Strategies (Options)", 
+                                  "Goal")) |>
+      dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                    questiontext == 'Area' ~ "goal_area",
+                                                    
+                                                    TRUE ~ stringr::str_to_snake(stringr::str_remove(stringr::str_remove_all(questiontext, "Progress "), " \\(1-10\\)"))
+      ), 
+      questiontext = stringr::str_replace(questiontext,  "final", "end") |> 
+        stringr::str_replace("initial", "start") |>  
+        stringr::str_replace("exit", "end"))
+  }
+  
   sn_prep <- function(sn_form) {
     
     form_complete <- sn_form |>
@@ -328,16 +348,25 @@ prep_measures <-  function(measures, fundings, type){
     a <-  measures |>
       dplyr::inner_join(fundings, by = c("PersonId" = "fldpersonid")) 
     
-    a |>
-      filter(questiontext == "Area of Support Focus") |> 
-      group_by(AcpFilledFormId) |>
-      mutate(questiontext = case_when(!is.na(answer) ~ paste0("aos_", stringr::str_to_snake(answer)), 
+    aos <-  a |>
+      dplyr::filter(questiontext == "Area of Support Focus") |> 
+      dplyr::group_by(AcpFilledFormId) |>
+      dplyr::mutate(questiontext = case_when(!is.na(answer) ~ paste0("aos_", stringr::str_to_snake(answer)), 
                                       TRUE ~ questiontext),
              answer = case_when(!is.na(answer) ~ "TRUE", 
                                 TRUE ~ answer)
       ) |> 
-      ungroup() |> 
-      bind_rows(filter(a, questiontext != "Area of Support Focus")) |>
+      dplyr::ungroup() 
+    
+    goals <- a |> 
+      dplyr::filter(SectionName  == "Goal Setting") |> 
+      dplyr::mutate(AcpFilledFormId = paste0(AcpFilledFormId, SubSectionRowCounter))
+    
+    a |> dplyr::filter(
+           questiontext != "Area of Support Focus", 
+           SectionName  != "Goal Setting") |> 
+      dplyr::bind_rows(aos,
+                       goals) |>
       dplyr::group_by(AcpFilledFormId, questiontext) |>
       dplyr::filter(answer_modified_date == max(answer_modified_date) | is.na(answer_modified_date)) |>
       dplyr::ungroup()
@@ -540,6 +569,30 @@ prep_measures <-  function(measures, fundings, type){
       step_c() |> 
       mutate(across(.cols = matches("^amount_of_time|living_situation_rating|physical_health_1"), ~as.integer(.x)), 
              total_overall = get_support + hopefulness + part_of_group_community + wellbeing + achieve_important_things + happiness)
+     
+    return(out)
+    
+  }
+  if (type == "sn") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      sn_prep() |>
+      step_c() 
+     
+    return(out)
+    
+  }
+  if (type == "isp") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      isp_prep() |>
+      step_c() |> 
+      dplyr::relocate(goal_area, start_date, start_rating, 
+                      review_date, review_rating, 
+                      end_date, end_rating, end_goal_staus,  
+                      .after = everything())
      
     return(out)
     
