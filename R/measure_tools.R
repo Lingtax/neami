@@ -324,13 +324,15 @@ prep_measures <-  function(measures, fundings, type){
     form_complete <- sn_form |>
       # filter() |>
       dplyr::filter(questiontext %in% c("What aspects of the consumer’s narrative did they express as (or did you perceive as) being important in understanding the past and/or present factors that may impact safety?",
-                                 "Will outreach support be provided to the consumer?",
-                                 "What can be done and who will do what to create, maintain, or strengthen opportunities for safety?",
-                                 "What would the consumer expect staff to know if things were not going well for them, and what would they want staff to do?",
-                                 "What are the strengths, priorities, and opportunities the consumer has identified?",
-                                 "What are the safety considerations the consumer and worker identified as important to talk about and how does the consumer make sense of them?")) |> 
+                                        "Will outreach support be provided to the consumer?",
+                                        "What can be done and who will do what to create, maintain, or strengthen opportunities for safety?",
+                                        "What would the consumer expect staff to know if things were not going well for them, and what would they want staff to do?",
+                                        "What are the strengths, priorities, and opportunities the consumer has identified?",
+                                        "What are the safety considerations the consumer and worker identified as important to talk about and how does the consumer make sense of them?")) |> 
       dplyr::summarise(complete = sum(is.na(answer)) == 0, 
-                .by = c(AcpFilledFormId, PersonId, DateCreated, OriginalName, version_name, answer_modified_date)) |> 
+                       .by = c(AcpFilledFormId, PersonId, DateCreated, OriginalName, 
+                               version_name, answer_modified_date, fldservicesrequiredid, 
+                               funding_start, funding_end, fldservicename)) |> 
       tidyr::pivot_longer(complete, names_to = "questiontext", values_to = "answer") |> 
       dplyr::mutate(answer = as.character(answer))
     
@@ -392,6 +394,8 @@ prep_measures <-  function(measures, fundings, type){
                        completion_status = character(), 
                        decline_reason = character())) |> 
       dplyr::mutate(date_complete = lubridate::dmy(date_complete),
+                    date_complete = dplyr::case_when(is.na(date_complete) ~ date_created, 
+                                                     TRUE ~ date_complete),
                     across(where(is.character), ~ na_if(.,""))) |>
       dplyr::filter(date_complete >= funding_start,
                     date_complete <= funding_end | is.na(funding_end))  
@@ -592,7 +596,8 @@ prep_measures <-  function(measures, fundings, type){
       dplyr::relocate(goal_area, start_date, start_rating, 
                       review_date, review_rating, 
                       end_date, end_rating, end_goal_status,  
-                      .after = everything())
+                      .after = everything()) |> 
+      tidyr::drop_na(goal_area, start_date)
      
     return(out)
     
