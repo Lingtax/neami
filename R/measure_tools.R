@@ -162,8 +162,8 @@ standardise_measures <- function(item, type = "occasion") {
 #' @examples
 prep_measures <-  function(measures, fundings, type){
   
-  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "ras", "lcq", "sn", "isp"))) {
-    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp', 'lcq', 'sn', 'isp', or 'stsh'. Minimal prep applied.")
+  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "ras", "lcq", "sn", "isp", "intreg"))) {
+    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp', 'lcq', 'sn', 'isp', 'intreg', or 'stsh'. Minimal prep applied.")
     }
   
   k10_prep <- function(k10_data) {
@@ -343,6 +343,14 @@ prep_measures <-  function(measures, fundings, type){
       ) |> 
       dplyr::bind_rows(form_complete) 
     
+  }
+  
+  intreg_prep <- function(intreg_form) {
+    intreg_form |>
+      dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                    TRUE ~ questiontext)
+                    
+      )
   }
   
   
@@ -582,6 +590,16 @@ prep_measures <-  function(measures, fundings, type){
       step_a(fundings = fundings) |>
       # Custom filters and recodes
       sn_prep() |>
+      step_c() 
+     
+    return(out)
+    
+  }
+  if (type == "intreg") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      intreg_prep() |>
       step_c() 
      
     return(out)
