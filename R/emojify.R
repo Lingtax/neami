@@ -10,12 +10,27 @@
 #' emojify(c(TRUE, FALSE, TRUE))
 emojify <- function(x, type = "TF") {
   
-  if(!is.logical(x)) stop("emojify currently only supports logical variables")
+   if(!is.logical(x) & type == "TF" ) stop("emojify is expecting a logical variable")
+   if(is.logical(x) & type == "TL" ) stop("emojify is expecting a character variable with levels 'red', 'yellow', and 'green'")
   
-  x <- ifelse(x, "y", "n") 
-  if(type == "TF") {index = c(y = "✔", n = "❌")}
+  
+  if(type == "TF") {
+    x <- ifelse(x, "y", "n") 
+    index = c(y = "✔", n = "❌")
+    
+    }
+  
+  if(type == "TL") {
+    index = c(green = "🟢", yellow = "🟡", red = "🔴")
+    
+    }
+  
+  
   
   index[x]
+  
+  
+  
 }
 
 
