@@ -619,12 +619,8 @@ prep_measures <-  function(measures, fundings, type){
         review_rating = character(), 
         end_date = character(), 
         end_rating = character(), 
-        end_goal_status = character() 
-<<<<<<< HEAD
-      )) |> 
-=======
-      ))
->>>>>>> 46c106b728b5c6e4c768a0e4f6014b467ac54e1a
+        end_goal_status = character())
+        ) |> 
       dplyr::relocate(goal_area, start_date, start_rating, 
                       review_date, review_rating, 
                       end_date, end_rating, end_goal_status,  
