@@ -241,6 +241,7 @@ prep_measures <-  function(measures, fundings, type){
         stringr::str_detect(questiontext, "Comments", negate = TRUE),
       ) |>
       dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date completed' ~ "date_complete",
+                                                    questiontext == 'collection_occasion' ~ "collection_reason", 
                                                     questiontext == 'If the form was not completed please select the reason from the list:' ~ "decline_reason",
                                                     questiontext == 'Collection Occasion' ~ "collection_reason",
                                                     TRUE ~ questiontext),
@@ -636,7 +637,8 @@ prep_measures <-  function(measures, fundings, type){
       # Custom filters and recodes
       ras_prep() |>
       step_c() |> 
-      mutate(across(matches("^x\\d"), ~if_else(is.na(.x), 0L, .x)), 
+      mutate(collection_reason = standardise_measures(collection_reason, "occasion"),
+             across(matches("^x\\d"), ~if_else(is.na(.x), 0L, .x)), 
              d1_sum = rowSums(across(matches(paste0("^x", 1:6, "_")))),
              d1_count = rowSums(across(matches(paste0("^x", 1:6, "_")), ~.x!=0L)),
              d2_sum = rowSums(across(matches(paste0("^x", 7:24, "_")))),
