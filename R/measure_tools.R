@@ -611,6 +611,16 @@ prep_measures <-  function(measures, fundings, type){
       # Custom filters and recodes
       isp_prep() |>
       step_c() |> 
+      dplyr::bind_rows(tibble::tibble(
+        goal_area = character(), 
+        start_date = character(), 
+        start_rating = character(), 
+        review_date = character(), 
+        review_rating = character(), 
+        end_date = character(), 
+        end_rating = character(), 
+        end_goal_status = character() 
+      ))
       dplyr::relocate(goal_area, start_date, start_rating, 
                       review_date, review_rating, 
                       end_date, end_rating, end_goal_status,  
