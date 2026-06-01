@@ -614,11 +614,11 @@ prep_measures <-  function(measures, fundings, type){
       dplyr::bind_rows(tibble::tibble(
         goal_area = character(), 
         start_date = character(), 
-        start_rating = character(), 
+        start_rating = double(), 
         review_date = character(), 
-        review_rating = character(), 
+        review_rating = double(), 
         end_date = character(), 
-        end_rating = character(), 
+        end_rating = double(), 
         end_goal_status = character())
         ) |> 
       dplyr::relocate(goal_area, start_date, start_rating, 
