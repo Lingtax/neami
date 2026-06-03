@@ -492,8 +492,7 @@ prep_measures <-  function(measures, fundings, type){
         sdq_q16 = integer(), sdq_q17 = integer(), sdq_q18 = integer(), 
         sdq_q19 = integer(), sdq_q20 = integer(), sdq_q21 = integer(), 
         sdq_q22 = integer(), sdq_q23 = integer(), sdq_q24 = integer(), 
-        sdq_q25 = integer()),
-        collection_reason = character()) |> 
+        sdq_q25 = integer())) |> 
       dplyr::rowwise() |> 
       dplyr::mutate(emotional_symptoms_summary_score = case_when(sum((c(sdq_q3, sdq_q8,  sdq_q13,  sdq_q16, sdq_q24) %in% 0:2), na.rm = TRUE) < 3 ~ NA_real_,
                                                                  sum((c(sdq_q3, sdq_q8,  sdq_q13,  sdq_q16, sdq_q24) %in% 0:2), na.rm = TRUE) == 3 ~ round(sum(c(sdq_q3, sdq_q8,  sdq_q13,  sdq_q16, sdq_q24)/3 *5), 0),
