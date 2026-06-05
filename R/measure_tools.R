@@ -162,8 +162,8 @@ standardise_measures <- function(item, type = "occasion") {
 #' @examples
 prep_measures <-  function(measures, fundings, type){
   
-  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "ras", "lcq", "sn", "isp", "intreg"))) {
-    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp', 'lcq', 'sn', 'isp', 'intreg', or 'stsh'. Minimal prep applied.")
+  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "ras", "lcq", "sn", "isp", "intreg", "amhc_consent"))) {
+    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp', 'lcq', 'sn', 'isp', 'intreg', 'amhc_consent', or 'stsh'. Minimal prep applied.")
     }
   
   k10_prep <- function(k10_data) {
@@ -293,14 +293,10 @@ prep_measures <-  function(measures, fundings, type){
   amhcgp_prep <- function(amhcgp_form) {
     amhcgp_form |>
       # filter() |>
+      dplyr::filter_out(questiontext == "Please ensure the GP contact details are entered in the 'Who to Contact' section of Carelink.") |> 
       dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
-                                                    TRUE ~ questiontext) 
-      ) |> 
-      dplyr::mutate(questiontext = case_when(row_number() == 1 ~ "dr_title", 
-                                             row_number() == 2 ~ "dr_forename", 
-                                             row_number() == 3 ~ "dr_surname", 
-                                             TRUE ~ questiontext),
-                    .by = c(AcpFilledFormId, fldservicesrequiredid))
+                                                    TRUE ~  str_remove(questiontext, "^\\d+. "))
+      )
   }
   
   isp_prep <- function(isp_form) {
@@ -566,11 +562,13 @@ prep_measures <-  function(measures, fundings, type){
       # Custom filters and recodes
       amhcgp_prep() |>
       step_c() |> 
-      dplyr::bind_rows(tibble::tibble(
-        dr_title = character(), 
-        dr_forename = character(), 
-        dr_surname = character())) |>
-      unite(gp, c(dr_title, dr_forename, dr_surname), sep = " ") 
+      mutate(complete = !if_any(
+        c(consent_provided_and_gp_info_shared,
+          does_the_guest_have_a_regular_gp,
+          has_the_guest_been_referred_by_their_gp_to_our_service,
+          has_the_guest_been_referred_for_psychiatry_service, has_the_guest_gp_been_provided_with_written_feedback_or_information), is.na)
+       
+      ) 
     
     return(out)
     
@@ -603,6 +601,29 @@ prep_measures <-  function(measures, fundings, type){
       # Custom filters and recodes
       intreg_prep() |>
       step_c() 
+     
+    return(out)
+    
+  }
+  if (type == "amhc_consent") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      intreg_prep() |>
+      step_c() |> 
+      dplyr::mutate(complete = !if_any(
+        c(consent_date,
+          consent_made,
+          consent_for_my_health_record,
+          consent_for_anonymised_data_to_be_used_in_research_and_service_evaluation,
+          consent_to_be_contacted_to_be_involved_in_future_research,
+          consent_to_be_contacted_to_complete_feedback_and_evaluation_surveys,
+          consent_to_collect_personal_information_including_sensitive_health_information_and_sharing_my_personal_information_with_the_funder_of_this_service,
+          consent_to_share_information_relevant_to_my_care_with_other_people_mentioned_exclusively_in_the_hard_copy_form_and_or_organisations,
+          consent_to_the_transfer_of_information_to_another_service_provider,
+          consent_to_use_of_image_for_publication_internal_and_external,
+          obtained_by,
+          provided_by), is.na))
      
     return(out)
     
