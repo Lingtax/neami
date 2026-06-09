@@ -562,11 +562,17 @@ prep_measures <-  function(measures, fundings, type){
       # Custom filters and recodes
       amhcgp_prep() |>
       step_c() |> 
+      bind_rows(tibble(consent_provided_and_gp_info_shared = character(),
+                does_the_guest_have_a_regular_gp = character(),
+                has_the_guest_been_referred_by_their_gp_to_our_service = character(),
+                has_the_guest_been_referred_for_psychiatry_service = character(),
+                has_the_guest_gp_been_provided_with_written_feedback_or_information = character())) |> 
       mutate(complete = !if_any(
         c(consent_provided_and_gp_info_shared,
           does_the_guest_have_a_regular_gp,
           has_the_guest_been_referred_by_their_gp_to_our_service,
-          has_the_guest_been_referred_for_psychiatry_service, has_the_guest_gp_been_provided_with_written_feedback_or_information), is.na)
+          has_the_guest_been_referred_for_psychiatry_service, 
+          has_the_guest_gp_been_provided_with_written_feedback_or_information), is.na)
        
       ) 
     
@@ -579,6 +585,12 @@ prep_measures <-  function(measures, fundings, type){
       # Custom filters and recodes
       lcq_prep() |>
       step_c() |> 
+      bind_rows(tibble(get_support = integer(), 
+                       hopefulness = integer(),  
+                       part_of_group_community = integer(),  
+                       wellbeing = integer(),  
+                       achieve_important_things = integer(),  
+                       happiness = integer())) |> 
       mutate(across(.cols = matches("^amount_of_time|living_situation_rating|physical_health_1"), ~as.integer(.x)), 
              total_overall = get_support + hopefulness + part_of_group_community + wellbeing + achieve_important_things + happiness)
      
@@ -611,6 +623,18 @@ prep_measures <-  function(measures, fundings, type){
       # Custom filters and recodes
       intreg_prep() |>
       step_c() |> 
+      bind_rows(tibble(consent_date = character(),
+                       consent_made = character(),
+                       consent_for_my_health_record = character(),
+                       consent_for_anonymised_data_to_be_used_in_research_and_service_evaluation = character(),
+                       consent_to_be_contacted_to_be_involved_in_future_research = character(),
+                       consent_to_be_contacted_to_complete_feedback_and_evaluation_surveys = character(),
+                       consent_to_collect_personal_information_including_sensitive_health_information_and_sharing_my_personal_information_with_the_funder_of_this_service = character(),
+                       consent_to_share_information_relevant_to_my_care_with_other_people_mentioned_exclusively_in_the_hard_copy_form_and_or_organisations = character(),
+                       consent_to_the_transfer_of_information_to_another_service_provider = character(),
+                       consent_to_use_of_image_for_publication_internal_and_external = character(),
+                       obtained_by = character(),
+                       provided_by = character())) |> 
       dplyr::mutate(complete = !if_any(
         c(consent_date,
           consent_made,
