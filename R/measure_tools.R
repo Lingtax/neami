@@ -265,6 +265,8 @@ prep_measures <-  function(measures, fundings, type){
       dplyr::filter_out(str_detect(questiontext, "^Source|^Note")) |> 
       
       dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                    
+                                                    questiontext == 'Collection Occasion' ~ "collection_reason",
                                                     questiontext == 'Sum Q1 to Q5:' ~ "sidas_total",
                                                     str_detect(questiontext, "^\\d") ~ paste0("sidas_q", str_extract(questiontext, "^\\d")),
                                                     TRUE ~ questiontext)
@@ -550,7 +552,8 @@ prep_measures <-  function(measures, fundings, type){
       # Custom filters and recodes
       sidas_prep() |>
       step_c() |> 
-      mutate(complete = !dplyr::if_any(dplyr::starts_with("sidas_q"), is.na))
+      mutate(collection_reason = standardise_measures(collection_reason, "occasion"),
+        complete = !dplyr::if_any(dplyr::starts_with("sidas_q"), is.na))
     
     return(out)
     
