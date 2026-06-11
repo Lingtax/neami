@@ -9,8 +9,6 @@
 #'
 #' @return a data frame of paired measures more than an arbirtary number of days apart
 #' @export
-#'
-#' @examples
 pair_outcome_measures <-  function(df, grouping_id, measure_total, collection_occasions, collection_date, min_interval = 30) {
   
   df |> 
@@ -132,8 +130,6 @@ sdq_coder <- function(question, type, reverse = FALSE) {
 #'
 #' @return a standardised vector of strings.
 #' @export
-#'
-#' @examples
 standardise_measures <- function(item, type = "occasion") {
   
   if(type == "occasion") {
@@ -158,12 +154,10 @@ standardise_measures <- function(item, type = "occasion") {
 #'
 #' @return a wide data frame of forms linked to fundings 
 #' @export
-#'
-#' @examples
 prep_measures <-  function(measures, fundings, type){
   
-  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "ras", "lcq", "sn", "isp", "intreg", "amhc_consent"))) {
-    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp', 'lcq', 'sn', 'isp', 'intreg', 'amhc_consent', or 'stsh'. Minimal prep applied.")
+  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "ras", "sidas", "lcq", "sn", "isp", "intreg", "amhc_consent"))) {
+    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp', 'sidas', 'lcq', 'sn', 'isp', 'intreg', 'amhc_consent', or 'stsh'. Minimal prep applied.")
     }
   
   k10_prep <- function(k10_data) {
@@ -263,6 +257,19 @@ prep_measures <-  function(measures, fundings, type){
                                                 str_extract(answer, "\\d"),
                                               TRUE ~ as.character(answer))
       )
+  }
+  
+  sidas_prep <- function(sidas_form) {
+    
+    sidas_form |>
+      dplyr::filter_out(str_detect(questiontext, "^Source|^Note")) |> 
+      
+      dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                    questiontext == 'Sum Q1 to Q5:' ~ "sidas_total",
+                                                    str_detect(questiontext, "^\\d") ~ paste0("sidas_q", str_extract(questiontext, "^\\d")),
+                                                    TRUE ~ questiontext)
+      )
+    
   }
   
   pmhc_prep <- function(pmhc_form) {
@@ -532,6 +539,18 @@ prep_measures <-  function(measures, fundings, type){
       # Custom filters and recodes
       pmhc_prep() |>
       step_c()
+    
+    return(out)
+    
+  }
+  if (type == "sidas") {
+    
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      sidas_prep() |>
+      step_c() |> 
+      mutate(complete = !dplyr::if_any(dplyr::starts_with("sidas_q"), is.na))
     
     return(out)
     
