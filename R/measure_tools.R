@@ -156,8 +156,8 @@ standardise_measures <- function(item, type = "occasion") {
 #' @export
 prep_measures <-  function(measures, fundings, type){
   
-  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "ras", "sidas", "lcq", "sn", "isp", "intreg", "amhc_consent"))) {
-    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp', 'sidas', 'lcq', 'sn', 'isp', 'intreg', 'amhc_consent', or 'stsh'. Minimal prep applied.")
+  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "ras", "sidas", "ua", "lcq", "sn", "isp", "intreg", "amhc_consent"))) {
+    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp', 'sidas', 'ua', 'lcq', 'sn', 'isp', 'intreg', 'amhc_consent', or 'stsh'. Minimal prep applied.")
     }
   
   k10_prep <- function(k10_data) {
@@ -269,6 +269,21 @@ prep_measures <-  function(measures, fundings, type){
                                                     questiontext == 'Collection Occasion' ~ "collection_reason",
                                                     questiontext == 'Sum Q1 to Q5:' ~ "sidas_total",
                                                     str_detect(questiontext, "^\\d") ~ paste0("sidas_q", str_extract(questiontext, "^\\d")),
+                                                    TRUE ~ questiontext)
+      )
+    
+  }
+  
+  ua_prep <- function(ua_form) {
+    
+    ua_form |>
+      dplyr::filter_out(str_detect(questiontext, "^Note")) |> 
+      dplyr::filter_out(str_detect(questiontext, "^Comments")) |> 
+      dplyr::filter_out(str_detect(questiontext, "The Support Plan should be reviewed 6")) |> 
+      
+      dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                    questiontext == "Occasion Reason" ~ "collection_reason",
+                                                    
                                                     TRUE ~ questiontext)
       )
     
@@ -541,6 +556,18 @@ prep_measures <-  function(measures, fundings, type){
       # Custom filters and recodes
       pmhc_prep() |>
       step_c()
+    
+    return(out)
+    
+  }
+  
+  if (type == "ua") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      ua_prep() |>
+      step_c() |>  
+      mutate(collection_reason = standardise_measures(collection_reason, "occasion"))
     
     return(out)
     
