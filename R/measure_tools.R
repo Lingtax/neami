@@ -567,7 +567,8 @@ prep_measures <-  function(measures, fundings, type){
       # Custom filters and recodes
       ua_prep() |>
       step_c() |>  
-      mutate(collection_reason = standardise_measures(collection_reason, "occasion"))
+      mutate(collection_reason = standardise_measures(collection_reason, "occasion")) |> 
+      bind_rows(tibble(plan_type = character()))
     
     return(out)
     
