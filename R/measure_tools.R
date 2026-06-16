@@ -277,13 +277,10 @@ prep_measures <-  function(measures, fundings, type){
   ua_prep <- function(ua_form) {
     
     ua_form |>
-      dplyr::filter_out(str_detect(questiontext, "^Note")) |> 
-      dplyr::filter_out(str_detect(questiontext, "^Comments")) |> 
-      dplyr::filter_out(str_detect(questiontext, "The Support Plan should be reviewed 6")) |> 
-      
+      dplyr::filter(str_detect(version_name, "UA plan")) |> 
+      dplyr::filter_out(str_detect(questiontext, "^Comments")) |>
       dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
                                                     questiontext == "Occasion Reason" ~ "collection_reason",
-                                                    
                                                     TRUE ~ questiontext)
       )
     
@@ -390,14 +387,24 @@ prep_measures <-  function(measures, fundings, type){
       dplyr::ungroup() 
     
     goals <- a |> 
+      # This is fragile and probably should specify the source form
       dplyr::filter(SectionName  == "Goal Setting") |> 
       dplyr::mutate(AcpFilledFormId = paste0(AcpFilledFormId, SubSectionRowCounter))
     
+    ua_plans <-  a |> 
+      filter(version_name== 'PMHC MDS Universal Aftercare',
+             str_detect(SectionName,"^Plans$")) |> 
+    mutate(AcpFilledFormId = paste0(AcpFilledFormId, SubSectionRowCounter),
+           version_name    = "UA plan")
+    
+    
     a |> dplyr::filter(
            questiontext != "Area of Support Focus", 
-           SectionName  != "Goal Setting") |> 
+           SectionName  != "Goal Setting", 
+           version_name != 'PMHC MDS Universal Aftercare') |> 
       dplyr::bind_rows(aos,
-                       goals) |>
+                       goals, 
+                       ua_plans) |>
       dplyr::group_by(AcpFilledFormId, questiontext) |>
       dplyr::filter(answer_modified_date == max(answer_modified_date) | is.na(answer_modified_date)) |>
       dplyr::ungroup()
