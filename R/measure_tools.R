@@ -262,7 +262,7 @@ prep_measures <-  function(measures, fundings, type){
   honos_prep <- function(honos_form) {
     
     honos_form |>
-      dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+      dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date completed' ~ "date_complete",
                                                     questiontext == "Reason for completion" ~ "collection_reason",
                                                     
                                                     TRUE ~ questiontext),
