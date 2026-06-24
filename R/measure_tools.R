@@ -156,8 +156,8 @@ standardise_measures <- function(item, type = "occasion") {
 #' @export
 prep_measures <-  function(measures, fundings, type){
   
-  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "ras", "sidas", "ua", "lcq", "sn", "isp", "intreg", "amhc_consent"))) {
-    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp', 'sidas', 'ua', 'lcq', 'sn', 'isp', 'intreg', 'amhc_consent', or 'stsh'. Minimal prep applied.")
+  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "honos", "ras", "sidas", "ua", "lcq", "sn", "isp", "intreg", "amhc_consent"))) {
+    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp', 'honos', 'sidas', 'ua', 'lcq', 'sn', 'isp', 'intreg', 'amhc_consent', or 'stsh'. Minimal prep applied.")
     }
   
   k10_prep <- function(k10_data) {
@@ -257,6 +257,24 @@ prep_measures <-  function(measures, fundings, type){
                                                 str_extract(answer, "\\d"),
                                               TRUE ~ as.character(answer))
       )
+  }
+  
+  honos_prep <- function(honos_form) {
+    
+    honos_form |>
+      dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                    questiontext == "Reason for completion" ~ "collection_reason",
+                                                    
+                                                    TRUE ~ questiontext),
+                    answer = case_when(
+                      answer =="No problem" ~  "0",
+                      answer =="Minor problem requiring no formal action"  ~ "1",
+                      answer =="Mild problem"  ~ "2",
+                      answer =="Problem of moderate severity"  ~ "3",
+                      answer =="Severe to very severe problem" ~  "4",
+                      TRUE ~ answer)
+      )
+    
   }
   
   sidas_prep <- function(sidas_form) {
@@ -651,6 +669,54 @@ prep_measures <-  function(measures, fundings, type){
       mutate(across(.cols = matches("^amount_of_time|living_situation_rating|physical_health_1"), ~as.integer(.x)), 
              total_overall = get_support + hopefulness + part_of_group_community + wellbeing + achieve_important_things + happiness)
      
+    return(out)
+    
+  }
+  if (type == "honos") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      honos_prep() |>
+      step_c() |> 
+      mutate(across(where(is.numeric), as.character)) |> 
+      bind_rows(
+        tibble(
+          overactive_aggressive_disruptive_or_agitated_behaviour = character(),
+          non_accidental_self_injury = character(),
+          problem_drinking_or_drug_taking = character(),
+          cognitive_problems = character(),
+          physical_illness_or_disability_problems = character(),
+          problems_associated_with_hallucinations_or_delusions = character(),
+          problems_with_depressed_mood = character(),
+          other_mental_and_behavioural_problems = character(),
+          problems_with_relationships = character(),
+          problems_with_activities_of_daily_living = character(),
+          problems_with_living_conditions = character(),
+          problems_with_occupation_and_activities = character())
+      ) |> 
+      mutate(across(.cols = c(overactive_aggressive_disruptive_or_agitated_behaviour,
+                              non_accidental_self_injury,
+                              problem_drinking_or_drug_taking,
+                              cognitive_problems,
+                              physical_illness_or_disability_problems,
+                              problems_associated_with_hallucinations_or_delusions,
+                              problems_with_depressed_mood,
+                              other_mental_and_behavioural_problems,
+                              problems_with_relationships,
+                              problems_with_activities_of_daily_living,
+                              problems_with_living_conditions,
+                              problems_with_occupation_and_activities), as.numeric),
+             collection_reason = standardise_measures(collection_reason, "occasion"),
+             date_complete = dmy(date_complete),
+             behavioural_probs = overactive_aggressive_disruptive_or_agitated_behaviour +
+               non_accidental_self_injury + problem_drinking_or_drug_taking, 
+             impairment = cognitive_problems + physical_illness_or_disability_problems,  
+             symptomatic = problems_associated_with_hallucinations_or_delusions +
+               problems_with_depressed_mood + other_mental_and_behavioural_problems, 
+             social_probs = problems_with_relationships + problems_with_activities_of_daily_living + 
+               problems_with_living_conditions + problems_with_occupation_and_activities,
+             total_score = behavioural_probs + impairment + symptomatic + social_probs,
+             complete = !is.na(total_score))
     return(out)
     
   }
