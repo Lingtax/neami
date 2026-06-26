@@ -136,6 +136,7 @@ standardise_measures <- function(item, type = "occasion") {
     idx <- c("Episode start" = "Episode start",
              "Episode end" = "Episode end",
              "Review" = "Review",
+             "Periodic/Ongoing" = "Review",
              "Entry" = "Episode start",
              "Exit" = "Episode end")
     
@@ -156,8 +157,8 @@ standardise_measures <- function(item, type = "occasion") {
 #' @export
 prep_measures <-  function(measures, fundings, type){
   
-  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "honos", "ras", "sidas", "ua", "lcq", "sn", "isp", "intreg", "amhc_consent"))) {
-    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp', 'honos', 'sidas', 'ua', 'lcq', 'sn', 'isp', 'intreg', 'amhc_consent', or 'stsh'. Minimal prep applied.")
+  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "pwi",  "honos", "ras", "sidas", "ua", "lcq", "sn", "isp", "intreg", "amhc_consent"))) {
+    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp', 'pwi', 'honos', 'sidas', 'ua', 'lcq', 'sn', 'isp', 'intreg', 'amhc_consent', or 'stsh'. Minimal prep applied.")
     }
   
   k10_prep <- function(k10_data) {
@@ -303,6 +304,40 @@ prep_measures <-  function(measures, fundings, type){
       )
     
   }
+  
+  pwi_prep <- function(pwi_form) {
+    
+    pwi_form |>
+      dplyr::mutate(questiontext = str_trim(questiontext)) |> 
+      dplyr::filter(questiontext != "For guidelines and scoring specifically applicable to your program, please check with the funding body.",
+                    questiontext != "On this scale, Zero means you feel no satisfaction at all. 10 means you feel completely satisfied.", 
+                    questiontext != "General life satisfaction - this question is not part of the PWI however it may be usefully added as introductory question. This question is labelled as question zero (0).",
+                    questiontext != "The Personal Wellbeing Items",
+                    questiontext != "The core set of items forming the PWI comprises seven questions of satisfaction with specific life domains - questions 1 - 7.",
+                    questiontext != "Thinking about your own life and personal circumstances, how satisfied are you with:",
+                    questiontext != "Additional Optional Items",
+                    questiontext !=  "Additional Optional Item - introductory question",
+                    questiontext != "Additional domain - cultural question. This question was added for use with Aboriginal or Torres Strait Islander peoples managed by the Aboriginal Housing Office (DCJ). This question is not scored and is labelled as question eight/DCJ (8/DCJ).",
+                    questiontext != "Spirituality and religion - this item can be included in the scores however if not relevant to the respondent, only the seven main domains are scored. This question is labelled as question eight (8).",
+                    questiontext != "PWI Questions",
+      ) |> 
+      dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date this form was completed' ~ "date_complete",
+                                                    questiontext == "Collection Occasion" ~ "collection_reason",
+                                                    questiontext == "0. Your life as a whole?" ~ "life_overall",
+                                                    questiontext == "1. Your standard of living?" ~ "standard_of_living",
+                                                    questiontext == "2. Your health?" ~ "health",
+                                                    questiontext == "3. What you are achieving in life?" ~ "achieving",
+                                                    questiontext == "4. Your personal relationships?" ~ "personal_relationships",
+                                                    questiontext == "5. How safe you feel?" ~ "safety",
+                                                    questiontext == "6. Feeling part of your community?" ~ "community_connection",
+                                                    questiontext == "7. Your future security?" ~ "future_security",
+                                                    questiontext == "8. How satisfied are you with your spirituality or religion?" ~ "spirituality_religion",
+                                                    questiontext == "8/DCJ. How happy are you with your connection to culture?" ~ "atsi_culture",
+                                                    TRUE ~ questiontext)
+      )
+    
+  }
+  
   
   pmhc_prep <- function(pmhc_form) {
     pmhc_form |>
@@ -581,6 +616,43 @@ prep_measures <-  function(measures, fundings, type){
       # Custom filters and recodes
       pmhc_prep() |>
       step_c()
+    
+    return(out)
+    
+  }
+  
+  if (type == "pwi") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      pwi_prep() |>
+      step_c() |> mutate(across(where(is.numeric), as.character)) |> 
+      bind_rows(
+        tibble(
+          life_overall = character(),
+          standard_of_living = character(),
+          health = character(),
+          achieving = character(),
+          personal_relationships = character(),
+          safety = character(),
+          community_connection = character(),
+          future_security = character(),
+          spirituality_religion = character(),
+          atsi_culture = character())) |> 
+      mutate(across(.cols = c(life_overall, 
+                              standard_of_living, 
+                              health, 
+                              achieving, 
+                              personal_relationships, 
+                              safety, 
+                              community_connection, 
+                              future_security, 
+                              spirituality_religion, 
+                              atsi_culture), ~as.numeric(str_extract(.x, "\\d+"))),
+             collection_reason = standardise_measures(collection_reason, "occasion"),
+             date_complete = dmy(date_complete),
+             total_score = round((standard_of_living + health + achieving + personal_relationships + safety + community_connection + future_security ) / 7, 1) * 10, 
+             complete = !is.na(total_score))
     
     return(out)
     
