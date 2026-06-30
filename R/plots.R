@@ -16,6 +16,7 @@
 paired_t_plot <-  function(data, x, y, group, colour = NULL, type = NULL) {
   
   if (!missing(type)) {
+    
     if(type == "k10"){
       rects <-  data.frame(level = c("Mild", "Moderate", "Severe"), 
                            ymin = seq(20, 30, 5), 
@@ -28,7 +29,24 @@ paired_t_plot <-  function(data, x, y, group, colour = NULL, type = NULL) {
       
       labels <- data.frame(labels =c("Mild", "Moderate", "Severe"), 
                            x = .45, 
-                           y= c(22.5, 27.5, 32.5))
+                           y= c(22.5, 27.5, 32.5)) 
+      } else if(type == "wsas"){
+
+            rects <-  data.frame(level = c("Subclinical", "Significant Functional Impairment", "Moderately severe or worse"),
+                           ymin = c(0, 10, 21),
+                           ymax = c(10,21, 40),
+                           xmin = -Inf,
+                           xmax = Inf,
+                           fill = c("palegreen", "orange", "red"))
+      values <-  rects$fill
+      names(values) <- rects$level
+
+      labels <- data.frame(labels =c("Subclinical", "Significant Functional Impairment", "Moderately severe or worse"),
+                           x = .45,
+                           y= c(5, 15, 25))
+      }  else {
+        warning("Type ", type, " is not supported.")
+      }
       
       ggplot2::ggplot(data, ggplot2::aes(x = factor({{x}}),
                                          y = {{y}},
@@ -51,10 +69,7 @@ paired_t_plot <-  function(data, x, y, group, colour = NULL, type = NULL) {
         ggplot2::scale_fill_manual(values = values) + 
         neami::hide_x_grid() + 
         ggplot2::guides(fill = guide_none())
-    }    else {
-      warning("Type ", type, " is not supported.")
-    }
-  } else {
+    } else {
     
     ggplot2::ggplot(data, ggplot2::aes(x = factor({{x}}),
                                        y = {{y}},
