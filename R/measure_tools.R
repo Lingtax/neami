@@ -157,8 +157,8 @@ standardise_measures <- function(item, type = "occasion") {
 #' @export
 prep_measures <-  function(measures, fundings, type){
   
-  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "pwi", "wsas", "honos", "ras", "sidas", "ua", "lcq", "sn", "isp", "intreg", "amhc_consent"))) {
-    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'wsas', 'amhc_gp', 'pwi', 'honos', 'sidas', 'ua', 'lcq', 'sn', 'isp', 'intreg', 'amhc_consent', or 'stsh'. Minimal prep applied.")
+  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "pwi", "wsas", "gses", "honos", "ras", "sidas", "ua", "lcq", "sn", "isp", "intreg", "amhc_consent"))) {
+    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'wsas', 'gses', 'amhc_gp', 'pwi', 'honos', 'sidas', 'ua', 'lcq', 'sn', 'isp', 'intreg', 'amhc_consent', or 'stsh'. Minimal prep applied.")
     }
   
   k10_prep <- function(k10_data) {
@@ -377,6 +377,21 @@ prep_measures <-  function(measures, fundings, type){
         str_detect(questiontext, "04. Because of my health problems my private leisure activities are impaired:") ~ "private_leisure",
         str_detect(questiontext, "Because of my health problem/s my ability to form and maintain relationships with others, including those I live with, is impaired:") ~ "relationships",
         TRUE ~ questiontext)
+      )
+    
+  }
+  
+  gses_prep <- function(gses_form) {
+    
+    gses_form |>
+      dplyr::mutate(questiontext = str_trim(str_remove(questiontext, "\\(gse\\) "))) |> 
+      dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date of completion' ~ "date_complete",
+                                                    questiontext == "Occasion / Reason for completion?" ~ "collection_reason",
+                                                    stringr::str_detect(questiontext, "If the form was not completed") ~ "decline_reason",
+                                                    stringr::str_detect(questiontext, "^\\d") ~ paste0("gse", stringr::str_extract(questiontext, "^\\d+")),
+                                                    TRUE ~ questiontext),
+                    answer = dplyr::case_when(stringr::str_detect(answer,  "^\\d -") ~ stringr::str_extract(answer,  "^\\d"), 
+                                              TRUE ~ answer)
       )
     
   }
@@ -720,6 +735,40 @@ prep_measures <-  function(measures, fundings, type){
     return(out)
     
   }
+  if (type == "gses") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      iar_prep() |>
+      step_c() |> 
+      mutate(across(where(is.numeric), as.character)) |> 
+      bind_rows(
+        tibble(date_complete = character(),
+               gse01 = character(), 
+               gse02 = character(), 
+               gse03 = character(), 
+               gse04 = character(), 
+               gse05 = character(), 
+               gse06 = character(), 
+               gse07 = character(), 
+               gse08 = character(), 
+               gse09 = character(), 
+               gse10 = character())
+      ) |> 
+      type_convert() |> 
+      mutate(
+        collection_reason = standardise_measures(collection_reason, "occasion"),
+        date_complete = dmy(date_complete),
+        across(starts_with("gse"), ~case_when(.x < 1 ~ NA_integer_, 
+                                              .x > 4 ~ NA_integer_, 
+                                              TRUE ~ .x)),
+        total_score = rowSums(across(starts_with("gse"))), 
+        complete = !is.na(total_score))
+    
+    return(out)
+    
+  }
+  
   if (type == "wsas") {
     out <-  measures |>
       step_a(fundings = fundings) |>
