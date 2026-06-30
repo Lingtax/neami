@@ -730,7 +730,34 @@ prep_measures <-  function(measures, fundings, type){
       step_a(fundings = fundings) |>
       # Custom filters and recodes
       iar_prep() |>
-      step_c()
+      step_c() |> 
+      mutate(across(where(is.numeric), as.character)) |> 
+      bind_rows(
+        tibble(date_complete = character(),
+               domain_1_symptom_severity_and_distress = character(),
+               domain_2_risk_of_harm = character(),
+               domain_3_functioning = character(),
+               domain_4_impact_of_co_existing_conditions = character(),
+               domain_5_treatment_and_recovery_history = character(),
+               domain_6_social_and_environmental_stressors = character(),
+               domain_7_family_and_other_supports = character(),
+               domain_8_engagement_and_motivation = character(),
+               practitioner_level_of_care = character())
+      ) |> 
+      type_convert() |>
+      mutate(
+        collection_reason = standardise_measures(collection_reason, "occasion"),
+        date_complete = dmy(date_complete),
+        iar_dst_level = str_extract(practitioner_level_of_care, "\\d"),
+        complete = !if_any(c(domain_1_symptom_severity_and_distress,
+                             domain_2_risk_of_harm,
+                             domain_3_functioning,
+                             domain_4_impact_of_co_existing_conditions,
+                             domain_5_treatment_and_recovery_history,
+                             domain_6_social_and_environmental_stressors,
+                             domain_7_family_and_other_supports,
+                             domain_8_engagement_and_motivation,
+                             practitioner_level_of_care), is.na)) 
     
     return(out)
     
