@@ -738,6 +738,9 @@ prep_measures <-  function(measures, fundings, type){
       mutate(
         collection_reason = standardise_measures(collection_reason, "occasion"),
         date_complete = date_created,
+        across(c(work, home_management, social_leisure, private_leisure, relationships), ~case_when(.x < 0 ~ NA_integer_, 
+                                                                                                    .x > 8 ~ NA_integer_, 
+                                                                                                    TRUE ~ .x)),
         total_score = work + home_management + social_leisure + private_leisure + relationships, 
         severity = factor(case_when(total_score < 10 ~ "Subclinical", 
                                     total_score < 21 ~ "Significant functional impairment", 
