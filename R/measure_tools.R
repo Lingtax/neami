@@ -157,8 +157,8 @@ standardise_measures <- function(item, type = "occasion") {
 #' @export
 prep_measures <-  function(measures, fundings, type){
   
-  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "pwi",  "honos", "ras", "sidas", "ua", "lcq", "sn", "isp", "intreg", "amhc_consent"))) {
-    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'amhc_gp', 'pwi', 'honos', 'sidas', 'ua', 'lcq', 'sn', 'isp', 'intreg', 'amhc_consent', or 'stsh'. Minimal prep applied.")
+  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "pwi", "wsas", "honos", "ras", "sidas", "ua", "lcq", "sn", "isp", "intreg", "amhc_consent"))) {
+    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'wsas', 'amhc_gp', 'pwi', 'honos', 'sidas', 'ua', 'lcq', 'sn', 'isp', 'intreg', 'amhc_consent', or 'stsh'. Minimal prep applied.")
     }
   
   k10_prep <- function(k10_data) {
@@ -362,6 +362,23 @@ prep_measures <-  function(measures, fundings, type){
       dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
                                                     TRUE ~ questiontext)
       )
+  }
+  
+  wsas_prep <- function(wsas_form) {
+    
+    wsas_form |>
+      dplyr::mutate(questiontext = str_trim(str_remove(questiontext, "\\(wsa\\) "))) |> 
+      dplyr::mutate(questiontext = dplyr::case_when(#questiontext == 'Date of Entry' ~ "date_complete",
+        questiontext == "Occasion / Reason for completion?" ~ "collection_reason",
+        str_detect(questiontext, "If the form was not completed") ~ "decline_reason",
+        str_detect(questiontext, "01. Because of my health problem/s my ability to work is impaired") ~ "work",
+        str_detect(questiontext, "02. Because of my health problems my home management is impaired:") ~ "home_management",
+        str_detect(questiontext, "03. Because of my health problem/s my social leisure activities are impaired:") ~ "social_leisure",
+        str_detect(questiontext, "04. Because of my health problems my private leisure activities are impaired:") ~ "private_leisure",
+        str_detect(questiontext, "Because of my health problem/s my ability to form and maintain relationships with others, including those I live with, is impaired:") ~ "relationships",
+        TRUE ~ questiontext)
+      )
+    
   }
   
   amhcgp_prep <- function(amhcgp_form) {
@@ -699,6 +716,34 @@ prep_measures <-  function(measures, fundings, type){
       # Custom filters and recodes
       iar_prep() |>
       step_c()
+    
+    return(out)
+    
+  }
+  if (type == "wsas") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      wsas_prep() |>
+      step_c() |> 
+      mutate(across(where(is.numeric), as.character)) |> 
+      bind_rows(
+        tibble(date_created = POSIXct(),
+               work = character(),
+               home_management = character(),
+               social_leisure  = character(),
+               private_leisure = character(),
+               relationships   = character())) |> 
+      type_convert() |> 
+      mutate(
+        collection_reason = standardise_measures(collection_reason, "occasion"),
+        date_complete = date_created,
+        total_score = work + home_management + social_leisure + private_leisure + relationships, 
+        severity = factor(case_when(total_score < 10 ~ "Subclinical", 
+                                    total_score < 21 ~ "Significant functional impairment", 
+                                    TRUE             ~ "Moderately severe or worse"),
+                          levels = c("Subclinical", "Significant functional impairment", "Moderately severe or worse")),
+        complete = !is.na(total_score))
     
     return(out)
     
