@@ -547,8 +547,16 @@ prep_measures <-  function(measures, fundings, type){
                                             round(sum(c(k10_q1, k10_q2, k10_q3, k10_q4, k10_q5, 
                                                         k10_q6, k10_q7, k10_q8, k10_q9, k10_q10), na.rm = TRUE) / 9 * 10, 0),
                                           TRUE ~ k10_q1 + k10_q2 + k10_q3 + k10_q4 + k10_q5 + 
-                                            k10_q6 + k10_q7 + k10_q8 + k10_q9 + k10_q10)
-      ) |>
+                                            k10_q6 + k10_q7 + k10_q8 + k10_q9 + k10_q10),
+                    severity = factor(case_when(k10_total < 16 ~ "Low Distress",
+                                         k10_total < 22        ~ "Moderate Distress",
+                                         k10_total < 30        ~ "High Distress",
+                                         TRUE                  ~ "Very High Distress"), 
+                                      levels = c("Low Distress",
+                                                 "Moderate Distress",
+                                                 "High Distress",
+                                                 "Very High Distress"))
+                    ) |>
       dplyr::ungroup() |> 
       dplyr::filter(!if_all(c(completion_status, starts_with("k10_q")), is.na)) |> 
       dplyr::select(-decline_reason, -missing_items)
