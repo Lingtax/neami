@@ -15,12 +15,12 @@ pair_outcome_measures <-  function(df, grouping_id, measure_total, collection_oc
     dplyr::group_by({{ grouping_id }}) |>  
     dplyr::filter(!is.na({{ measure_total }}),
                   ({{collection_occasions}} %in% c("Entry", "Episode start") &
-                     {{ collection_date }} == min({{ collection_date }})) |
+                     {{ collection_date }} == min({{ collection_date }}, na.rm = TRUE)) |
                     ({{collection_occasions}} %in% c("Review", "Ongoing", "Periodic", "Periodic/Ongoing", "Review (not at Entry or Exit)") &
-                       {{ collection_date }} == max({{ collection_date }})) |
+                       {{ collection_date }} == max({{ collection_date }}, na.rm = TRUE)) |
                     ({{collection_occasions}} %in% c("Exit", "Episode end") &
-                       {{ collection_date }} == max({{ collection_date }})),
-                  lubridate::time_length(lubridate::interval(min({{ collection_date }}), max({{ collection_date }})), "days") > {{ min_interval }},
+                       {{ collection_date }} == max({{ collection_date }}, na.rm = TRUE)),
+                  lubridate::time_length(lubridate::interval(min({{ collection_date }}, na.rm = TRUE), max({{ collection_date }}, na.rm = TRUE)), "days") > {{ min_interval }},
     ) |>
     dplyr::filter(dplyr::n() > 1) |> 
     dplyr::arrange({{ collection_date }}) |>
@@ -491,7 +491,7 @@ prep_measures <-  function(measures, fundings, type){
                        goals, 
                        ua_plans) |>
       dplyr::group_by(AcpFilledFormId, questiontext) |>
-      dplyr::filter(answer_modified_date == max(answer_modified_date) | is.na(answer_modified_date)) |>
+      dplyr::filter(answer_modified_date == max(answer_modified_date, na.rm = TRUE) | is.na(answer_modified_date)) |>
       dplyr::ungroup()
   }
   
