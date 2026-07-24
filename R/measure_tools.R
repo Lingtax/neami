@@ -778,7 +778,7 @@ prep_measures <-  function(measures, fundings, type){
       step_c() |> 
       mutate(across(where(is.numeric), as.character)) |> 
       bind_rows(
-        tibble(date_complete = lubridate::POSIXct(),
+        tibble(date_complete = character(),
                gse01 = character(), 
                gse02 = character(), 
                gse03 = character(), 
