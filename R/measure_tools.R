@@ -778,7 +778,7 @@ prep_measures <-  function(measures, fundings, type){
       step_c() |> 
       mutate(across(where(is.numeric), as.character)) |> 
       bind_rows(
-        tibble(date_complete = character(),
+        tibble(date_complete = lubridate::POSIXct(),
                gse01 = character(), 
                gse02 = character(), 
                gse03 = character(), 
@@ -793,7 +793,6 @@ prep_measures <-  function(measures, fundings, type){
       type_convert() |> 
       mutate(
         collection_reason = standardise_measures(collection_reason, "occasion"),
-        date_complete = dmy(date_complete),
         across(starts_with("gse"), ~case_when(.x < 1 ~ NA_integer_, 
                                               .x > 4 ~ NA_integer_, 
                                               TRUE ~ .x)),
