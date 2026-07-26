@@ -754,7 +754,6 @@ prep_measures <-  function(measures, fundings, type){
       type_convert() |>
       mutate(
         collection_reason = standardise_measures(collection_reason, "occasion"),
-        date_complete = dmy(date_complete),
         iar_dst_level = str_extract(practitioner_level_of_care, "\\d"),
         complete = !if_any(c(domain_1_symptom_severity_and_distress,
                              domain_2_risk_of_harm,
