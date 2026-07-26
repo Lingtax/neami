@@ -741,8 +741,7 @@ prep_measures <-  function(measures, fundings, type){
       step_c() |> 
       mutate(across(where(is.numeric), as.character)) |> 
       bind_rows(
-        tibble(date_complete = character(),
-               domain_1_symptom_severity_and_distress = character(),
+        tibble(domain_1_symptom_severity_and_distress = character(),
                domain_2_risk_of_harm = character(),
                domain_3_functioning = character(),
                domain_4_impact_of_co_existing_conditions = character(),
@@ -778,7 +777,7 @@ prep_measures <-  function(measures, fundings, type){
       step_c() |> 
       mutate(across(where(is.numeric), as.character)) |> 
       bind_rows(
-        tibble(date_complete = lubridate::POSIXct(),
+        tibble(
                gse01 = character(), 
                gse02 = character(), 
                gse03 = character(), 
