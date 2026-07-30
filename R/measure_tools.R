@@ -39,15 +39,7 @@ pair_outcome_measures <-  function(df, grouping_id, measure_total, collection_oc
 #' @return a vector of integer values
 #' @export
 k10_coder <- function(item) {
-  # case_when(
-  #   item == "None of the time" ~ 1L, 
-  #   item == "A little of the time" ~ 2L, 
-  #   item == "Some of the time" ~ 3L, 
-  #   item == "Most of the time" ~ 4L, 
-  #   item == "All of the time"  ~ 5L, 
-  #   item == "" ~ NA_integer_, 
-  #   
-  # )
+ 
   idx <- c( "None of the time" = 1L, 
             "A little of the time" = 2L, 
             "Some of the time" = 3L, 
@@ -58,23 +50,33 @@ k10_coder <- function(item) {
   return(idx[item])
   
 }
+#' Codes Inspire O items
+#'
+#' @param item a vector of Inspire O response character strings in Sentence case   
+#'
+#' @return a vector of integer values
+#' @export
+inspire_coder <- function(item) {
+ 
+  idx <- c( "Not at all" = 0L,  
+            "Not much" = 1L, 
+            "Somewhat" = 2L,
+            "Quite a lot" = 3L, 
+            "Very much" = 4L
+            )
+  
+  
+  return(idx[item])
+  
+}
 #' Codes RAS-DS items
 #'
-#' @param item a vector of k10/k5 response character strings in Sentence case   
+#' @param item a vector of ras-ds response character strings in Sentence case   
 #'
 #' @return a vector of integer values
 #' @export
 ras_coder <- function(item) {
-  # case_when(
-  #   item == "Untrue" ~ 1L, 
-  #   item == "A bit True" ~ 2L, 
-  #   item == "Mostly True" ~ 3L, 
-  #   item == "Completely True  " ~ 4L, 
-  #   item == "" ~ 0L, 
-  #   item == " " ~ 0L, 
-  #   is.na(item) ~ 0L,
-  #   )
-  
+
   idx <- c("Untrue" = 1L, 
            "A bit True" = 2L, 
            "Mostly True" = 3L, 
@@ -305,6 +307,17 @@ prep_measures <-  function(measures, fundings, type){
     
   }
   
+  inspire_prep <- function(inspire_form) {
+    inspire_form |>
+      mutate(questiontext = stringr::str_trim(questiontext)) |> 
+      dplyr::mutate(answer = case_when(str_detect(questiontext, "^\\d. ") ~ as.character(inspire_coder(stringr::str_to_sentence(answer))), 
+                                       TRUE ~ answer), 
+                    questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                    TRUE ~ str_remove(questiontext, "^\\d. "),
+                    )
+      )
+  }
+  
   pwi_prep <- function(pwi_form) {
     
     pwi_form |>
@@ -533,12 +546,16 @@ prep_measures <-  function(measures, fundings, type){
       step_c() |>
       dplyr::mutate(#custom scoring
         across(starts_with("k10_q"), k10_coder),
-        completion_status = case_when(!if_any(starts_with("k10_q"), is.na) ~ "Measure Complete",
+        completion_status = case_when((version_name == "K10" | version_name == "K10 - WA SUSD Only") & 
+                                        k10_total >=10 & k10_total <= 50 ~ "Measure Complete"
+          !if_any(starts_with("k10_q"), is.na) ~ "Measure Complete",
                                       !is.na(decline_reason) ~ as.character(decline_reason), 
                                       TRUE ~ "Measure incomplete")) |> 
       dplyr::rowwise() |> 
       dplyr::mutate(missing_items = sum(is.na(c(k10_q1, k10_q2, k10_q3, k10_q4, k10_q5, 
                                                 k10_q6, k10_q7, k10_q8, k10_q9, k10_q10))),
+                    k10_total = case_when(k10_total < 10 | k10_total > 50 ~ NA_real_, 
+                                          TRUE ~ k10_total),
                     k10_total = case_when(version_name == "K10" | version_name == "K10 - WA SUSD Only" ~ k10_total, 
                                           !(version_name == "K10" | version_name == "K10 - WA SUSD Only") &
                                             missing_items > 1 ~ NA_real_, 
@@ -719,6 +736,30 @@ prep_measures <-  function(measures, fundings, type){
       step_c() |> 
       mutate(collection_reason = standardise_measures(collection_reason, "occasion"),
         complete = !dplyr::if_any(dplyr::starts_with("sidas_q"), is.na))
+    
+    return(out)
+    
+  }
+  if (type == "inspire") {
+    
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      inspire_prep() |>
+      step_c() |> 
+      mutate(across(where(is.numeric), as.character)) |> 
+      bind_rows(
+        tibble(i_do_things_that_mean_something_to_me  = character(),
+               i_feel_good_about_myself  = character(),
+               i_feel_in_control_of_my_life  = character(),
+               i_feel_supported_by_other_people  = character(),
+               i_have_hopes_and_dreams_for_the_future  = character())
+      ) |> 
+      type_convert() |>
+      mutate(inspire_total = (i_do_things_that_mean_something_to_me + i_feel_good_about_myself + 
+                                i_feel_in_control_of_my_life + i_feel_supported_by_other_people +
+                                i_have_hopes_and_dreams_for_the_future) * 5,
+             complete = !is.na(inspire_total))
     
     return(out)
     
@@ -908,7 +949,6 @@ prep_measures <-  function(measures, fundings, type){
                               problems_with_living_conditions,
                               problems_with_occupation_and_activities), as.numeric),
              collection_reason = standardise_measures(collection_reason, "occasion"),
-             date_complete = dmy(date_complete),
              behavioural_probs = overactive_aggressive_disruptive_or_agitated_behaviour +
                non_accidental_self_injury + problem_drinking_or_drug_taking, 
              impairment = cognitive_problems + physical_illness_or_disability_problems,  
