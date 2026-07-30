@@ -545,6 +545,7 @@ prep_measures <-  function(measures, fundings, type){
       k10_prep() |>
       step_c() |>
       dplyr::mutate(#custom scoring
+        collection_reason = standardise_measures(collection_reason, "occasion"),
         across(starts_with("k10_q"), k10_coder),
         completion_status = case_when((version_name == "K10" | version_name == "K10 - WA SUSD Only") & 
                                         k10_total >=10 & k10_total <= 50 ~ "Measure Complete",
