@@ -547,7 +547,7 @@ prep_measures <-  function(measures, fundings, type){
       dplyr::mutate(#custom scoring
         across(starts_with("k10_q"), k10_coder),
         completion_status = case_when((version_name == "K10" | version_name == "K10 - WA SUSD Only") & 
-                                        k10_total >=10 & k10_total <= 50 ~ "Measure Complete"
+                                        k10_total >=10 & k10_total <= 50 ~ "Measure Complete",
           !if_any(starts_with("k10_q"), is.na) ~ "Measure Complete",
                                       !is.na(decline_reason) ~ as.character(decline_reason), 
                                       TRUE ~ "Measure incomplete")) |> 
