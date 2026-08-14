@@ -1131,11 +1131,11 @@ prep_measures <-  function(measures, fundings, type){
                                                precipitating, predisposing, presenting, protecting,
                                                protective_factors, risk_from_others, risk_to_others,
                                                risk_to_self, social_circumstances, substance_use), .fns = is.na), 
-             bsp_complete = main_complete & medication_complete) |>
+             bps_complete = main_complete & medication_complete) |>
       select(acp_filled_form_id, person_id, fldservicesrequiredid, funding_start, funding_end, 
              fldservicename, version_name, date_created, date_complete, collection_reason, 
              completion_status, decline_reason, medications_listed, medication_complete, 
-             main_complete, bsp_complete)
+             main_complete, bps_complete)
     
     return(out)
     
