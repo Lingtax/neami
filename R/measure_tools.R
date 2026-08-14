@@ -1076,7 +1076,7 @@ prep_measures <-  function(measures, fundings, type){
              
       ) |>
       # per core_form_id, confirm at least one goal_complete_entry == TRUE
-      mutate(plan_complete = if_any(.cols = c(date_complete, what_matters_to_me), is.na) & any(goal_complete_entry, na.rm = TRUE), 
+      mutate(plan_complete = !if_any(.cols = c(date_complete, what_matters_to_me), is.na) & any(goal_complete_entry, na.rm = TRUE), 
              .by = core_form_id) |> 
       select(-c(date_added, my_goal, steps_towards_goal, whos_doing_what, core_form_id, goal_complete_entry) ) |> 
       filter(version_name == 'Vic Locals Care Plan')
