@@ -159,8 +159,13 @@ standardise_measures <- function(item, type = "occasion") {
 #' @export
 prep_measures <-  function(measures, fundings, type){
   
-  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "pwi", "wsas", "gses", "honos", "ras", "sidas", "ua", "lcq", "sn", "isp", "intreg", "amhc_consent"))) {
-    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 'wsas', 'gses', 'amhc_gp', 'pwi', 'honos', 'sidas', 'ua', 'lcq', 'sn', 'isp', 'intreg', 'amhc_consent', or 'stsh'. Minimal prep applied.")
+  if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "pwi", 
+                   "wsas", "gses", "honos", "ras", "sidas", "ua", "lcq", "sn", 
+                   "isp", "intreg", "amhc_consent", "locals", 'locals_plan', 'locals_bpsa'))) {
+    warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 
+                     'wsas', 'gses', 'amhc_gp', 'pwi', 'honos', 'sidas', 'ua', 
+                     'lcq', 'sn', 'isp', 'intreg', 'locals', 'locals_plan', 'locals_bpsa', 
+                     'amhc_consent', or 'stsh'. Minimal prep applied.")
     }
   
   k10_prep <- function(k10_data) {
@@ -468,7 +473,33 @@ prep_measures <-  function(measures, fundings, type){
                     
       )
   }
+  locals_prep <- function(locals_form) {
+    locals_form |>
+      mutate(questiontext = stringr::str_trim(questiontext)) |> 
+      filter(questiontext != 'The "Referred To" field should only be filled if the "Episode closed administratively - client referred elsewhere" is selected as the Episode Conclusion Status.') |>
+      dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                    TRUE ~ str_remove(questiontext, "^\\d. "),
+      )
+      )
+  }
   
+  locals_plan_prep <- function(locals_form) {
+    locals_form |>
+      mutate(questiontext = stringr::str_trim(questiontext)) |> 
+      dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                    TRUE ~ str_remove(questiontext, "^\\d. "),
+      )
+      )
+  }
+  
+  locals_bpsa_prep <- function(locals_form) {
+    locals_form |>
+      mutate(questiontext = stringr::str_trim(questiontext)) |> 
+      dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                    TRUE ~ str_remove(questiontext, "^\\d. "),
+      )
+      )
+  }  
   
   step_a <-  function(measures, fundings) {
     a <-  measures |>
@@ -486,8 +517,11 @@ prep_measures <-  function(measures, fundings, type){
     
     goals <- a |> 
       # This is fragile and probably should specify the source form
-      dplyr::filter(SectionName  == "Goal Setting") |> 
-      dplyr::mutate(AcpFilledFormId = paste0(AcpFilledFormId, SubSectionRowCounter))
+      dplyr::filter(str_detect(SectionName,  "^Goal Setting$")|
+                      str_detect(SectionName,  "^My Goals$") & version_name == 'Vic Locals Care Plan') |> 
+      dplyr::mutate(AcpFilledFormId = paste0(AcpFilledFormId, SubSectionRowCounter),
+                    version_name = case_when(version_name == 'Vic Locals Care Plan' & SectionName == "My Goals" ~ "Locals - goal",
+                                             TRUE ~ version_name))
     
     ua_plans <-  a |> 
       filter(version_name== 'PMHC MDS Universal Aftercare',
@@ -499,6 +533,7 @@ prep_measures <-  function(measures, fundings, type){
     a |> dplyr::filter(
            questiontext != "Area of Support Focus", 
            SectionName  != "Goal Setting", 
+           SectionName  != "My Goals",
            version_name != 'PMHC MDS Universal Aftercare') |> 
       dplyr::bind_rows(aos,
                        goals, 
@@ -874,6 +909,7 @@ prep_measures <-  function(measures, fundings, type){
     return(out)
     
   }
+  
   if (type == "amhc_gp") {
     out <-  measures |>
       step_a(fundings = fundings) |>
@@ -915,6 +951,7 @@ prep_measures <-  function(measures, fundings, type){
     return(out)
     
   }
+  
   if (type == "honos") {
     out <-  measures |>
       step_a(fundings = fundings) |>
@@ -962,6 +999,7 @@ prep_measures <-  function(measures, fundings, type){
     return(out)
     
   }
+  
   if (type == "sn") {
     out <-  measures |>
       step_a(fundings = fundings) |>
@@ -972,6 +1010,7 @@ prep_measures <-  function(measures, fundings, type){
     return(out)
     
   }
+  
   if (type == "intreg") {
     out <-  measures |>
       step_a(fundings = fundings) |>
@@ -982,6 +1021,126 @@ prep_measures <-  function(measures, fundings, type){
     return(out)
     
   }
+  
+  if (type == "locals") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      locals_prep() |>
+      step_c() |> 
+      mutate(across(where(is.numeric), as.character)) |> 
+      bind_rows(
+        tibble(
+          consumer_identity = character(),
+          episode_conclusion_date = character(),
+          episode_conclusion_status = character(),
+          ndis_participant = character(),
+          referred_by = character(),
+          referred_to = character(),
+          registered_with_another_provider_organisation = character(),
+          is_this_an_overflow_consumer_if_yes_which_service_did_they_come_from = character(),
+          ndis_participant_update_date = character(),
+          please_enter_the_ndis_participant_update_date_when_selecting_the_ndis_participant_status = character(),
+        )
+      ) |> 
+      type_convert() |>
+      mutate(
+        intake_complete = !if_any(.cols = c(ndis_participant, referred_by, registered_with_another_provider_organisation), is.na),
+        end_referral_correct = case_when(episode_conclusion_status == "Episode closed administratively - client referred elsewhere" & is.na(referred_to) ~ FALSE,
+                                         TRUE ~ TRUE), 
+        
+        exit_complete = !if_any(.cols = c(ndis_participant, referred_by, registered_with_another_provider_organisation, episode_conclusion_status, episode_conclusion_date), is.na) & end_referral_correct)
+     
+    return(out)
+    
+  }
+  
+  if (type == "locals_plan") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      locals_plan_prep() |>
+      step_c() |> 
+      bind_rows(
+        tibble(
+          date_added = character(),
+          my_goal = character(), 
+          steps_towards_goal = character(), 
+          whos_doing_what = character()
+        )
+      ) |> 
+      mutate(across(where(is.numeric), as.character), 
+             core_form_id = str_extract(acp_filled_form_id, ".{36}"), # isolate original form id
+             # confirm goal complete
+             goal_complete_entry = case_when(version_name == 'Locals - goal' ~ !if_any(.cols = c(date_added, my_goal, steps_towards_goal, whos_doing_what), is.na))
+             
+      ) |>
+      # per core_form_id, confirm at least one goal_complete_entry == TRUE
+      mutate(plan_complete = if_any(.cols = c(date_complete, what_matters_to_me), is.na) & any(goal_complete_entry, na.rm = TRUE), 
+             .by = core_form_id) |> 
+      select(-c(date_added, my_goal, steps_towards_goal, whos_doing_what, core_form_id, goal_complete_entry) ) |> 
+      filter(version_name == 'Vic Locals Care Plan')
+    
+    return(out)
+    
+  }
+  if (type == "locals_bpsa") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      locals_bpsa_prep() |>
+      step_c() |> 
+      
+      bind_rows(
+        tibble(
+          family_history = character(),
+          focus_of_support = character(),
+          formal_supports = character(),
+          functioning = character(),
+          informal_supports = character(),
+          mental_health_history = character(),
+          mental_health_presentation = character(),
+          perpetuating = character(),
+          physical_health = character(),
+          plan = character(),
+          precipitating = character(),
+          predisposing = character(),
+          presenting = character(),
+          protecting = character(),
+          protective_factors = character(),
+          risk_from_others = character(),
+          risk_to_others = character(),
+          risk_to_self = character(),
+          social_circumstances = character(),
+          substance_use = character(),
+          list = character(),
+          prescribed_managed_by = character(),
+          side_effects = character(),
+          takes_as_directed = character(),
+          understands_medication_regime = character())
+      ) |> 
+      mutate(across(where(is.numeric), as.character), 
+             medications_listed  = !(str_detect(str_to_lower(list), "^(nil|none|n\\/a|unknown)(\\s|$)") | is.na(list)),
+             medication_complete = !medications_listed | !if_any(.cols = c(prescribed_managed_by,
+                                                                           side_effects,
+                                                                           takes_as_directed,
+                                                                           understands_medication_regime), .fns = is.na),
+             main_complete = !if_any(.cols = c(family_history, focus_of_support, formal_supports, functioning,
+                                               informal_supports, mental_health_history, 
+                                               mental_health_presentation, perpetuating, physical_health, plan,
+                                               precipitating, predisposing, presenting, protecting,
+                                               protective_factors, risk_from_others, risk_to_others,
+                                               risk_to_self, social_circumstances, substance_use), .fns = is.na), 
+             bsp_complete = main_complete & medication_complete) |>
+      select(acp_filled_form_id, person_id, fldservicesrequiredid, funding_start, funding_end, 
+             fldservicename, version_name, date_created, date_complete, collection_reason, 
+             completion_status, decline_reason, medications_listed, medication_complete, 
+             main_complete, bsp_complete)
+    
+    return(out)
+    
+  }
+  
   if (type == "amhc_consent") {
     out <-  measures |>
       step_a(fundings = fundings) |>
