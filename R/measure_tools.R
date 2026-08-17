@@ -1045,7 +1045,7 @@ prep_measures <-  function(measures, fundings, type){
       ) |> 
       type_convert() |>
       mutate(
-        intake_complete = !if_any(.cols = c(ndis_participant, referred_by, registered_with_another_provider_organisation), is.na),
+        intake_complete = !if_any(.cols = c(referred_by, registered_with_another_provider_organisation), is.na),
         end_referral_correct = case_when(episode_conclusion_status == "Episode closed administratively - client referred elsewhere" & is.na(referred_to) ~ FALSE,
                                          TRUE ~ TRUE), 
         
