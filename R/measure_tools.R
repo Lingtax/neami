@@ -503,7 +503,9 @@ prep_measures <-  function(measures, fundings, type){
   
   step_a <-  function(measures, fundings) {
     a <-  measures |>
-      dplyr::inner_join(fundings, by = c("PersonId" = "fldpersonid")) 
+      dplyr::inner_join(fundings, by = c("PersonId" = "fldpersonid")) |> 
+      # ensure every table always has a fldservicesrequiredid
+      dplyr::bind_rows(tibble(fldservicesrequiredid = character()))
     
     aos <-  a |>
       dplyr::filter(questiontext == "Area of Support Focus") |> 
@@ -562,6 +564,8 @@ prep_measures <-  function(measures, fundings, type){
                        collection_reason = character(),
                        completion_status = character(), 
                        decline_reason = character())) |> 
+      
+      
       dplyr::mutate(date_complete = lubridate::dmy(date_complete),
                     date_complete = dplyr::case_when(is.na(date_complete) ~ date_created, 
                                                      TRUE ~ date_complete),
@@ -870,7 +874,7 @@ prep_measures <-  function(measures, fundings, type){
         collection_reason = standardise_measures(collection_reason, "occasion"),
         across(starts_with("gse"), ~case_when(.x < 1 ~ NA_integer_, 
                                               .x > 4 ~ NA_integer_, 
-                                              TRUE ~ .x)),
+                                              TRUE ~ as.integer(.x))),
         total_score = rowSums(across(starts_with("gse"))), 
         complete = !is.na(total_score))
     
@@ -898,7 +902,7 @@ prep_measures <-  function(measures, fundings, type){
         date_complete = date_created,
         across(c(work, home_management, social_leisure, private_leisure, relationships), ~case_when(.x < 0 ~ NA_integer_, 
                                                                                                     .x > 8 ~ NA_integer_, 
-                                                                                                    TRUE ~ .x)),
+                                                                                                    TRUE ~ as.integer(.x))),
         total_score = work + home_management + social_leisure + private_leisure + relationships, 
         severity = factor(case_when(total_score < 10 ~ "Subclinical", 
                                     total_score < 21 ~ "Significant functional impairment", 
@@ -1066,7 +1070,8 @@ prep_measures <-  function(measures, fundings, type){
           date_added = character(),
           my_goal = character(), 
           steps_towards_goal = character(), 
-          whos_doing_what = character()
+          whos_doing_what = character(),
+          what_matters_to_me = character() 
         )
       ) |> 
       mutate(across(where(is.numeric), as.character), 
