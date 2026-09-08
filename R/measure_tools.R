@@ -161,10 +161,10 @@ prep_measures <-  function(measures, fundings, type){
   
   if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "pwi", 
                    "wsas", "gses", "honos", "ras", "sidas", "ua", "lcq", "sn", 
-                   "isp", "intreg", "amhc_consent", "locals", 'locals_plan', 'locals_bpsa'))) {
+                   "isp", "intreg", "amhc_consent", "locals", 'locals_plan', 'locals_bpsa', 'hprompt'))) {
     warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 
                      'wsas', 'gses', 'amhc_gp', 'pwi', 'honos', 'sidas', 'ua', 
-                     'lcq', 'sn', 'isp', 'intreg', 'locals', 'locals_plan', 'locals_bpsa', 
+                     'lcq', 'sn', 'isp', 'intreg', 'hprompt', 'locals', 'locals_plan', 'locals_bpsa', 
                      'amhc_consent', or 'stsh'. Minimal prep applied.")
     }
   
@@ -501,6 +501,61 @@ prep_measures <-  function(measures, fundings, type){
       )
   }  
   
+  hprompt_prep <- function(hprompt_form) {
+    hprompt_form |>
+      dplyr::filter_out(str_detect(questiontext, "^Section")) |>
+      dplyr::filter_out(str_detect(questiontext, "^We know screening questions can feel personal.")) |>
+      dplyr::mutate(questiontext = stringr::str_trim(questiontext),
+                    questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                    TRUE ~ str_remove(questiontext, "^\\d. ")
+                    ),
+                    questiontext = dplyr::replace_values(questiontext, 
+                                                         # Navigating care
+                                                         "Do you feel confident navigating the health system (such as finding services, making appointments or  understanding referrals)?" ~ "s1_confident_navigating_care", 
+                                                         "Do you feel health professionals (such as General Practitioners) listen to you and support your physical health needs?" ~ "s1_practitioners_listen", 
+                                                         "Do you feel you have enough information about the medications you are currently taking, including their side effects?" ~ "s1_enough_medication_information", 
+                                                         "Do you have access to gender-affirming or gender-inclusive healthcare services?" ~ "s1_gender_affirming_care",
+                                                         # Health checks and prevention
+                                                         "Have you been able to access a dental check-up in the last 6 months?" ~ "s2_recent_dental_checkup", 
+                                                         "Have you had a general health check in the last 12 months? Generally, this includes blood pressure, lung function and blood tests such as cholesterol and blood glucose." ~ "s2_general_health_check", 
+                                                         "Have you been offered a free National Cervical Cancer Screening (Pap smear) relevant to you (age 25+ every 5 years)?" ~ "s2_offered_pap_smear", 
+                                                         "Have you been offered a free skin screening check?" ~ "s2_offered_skin_check", 
+                                                         "Have you been offered a free National Bowel Cancer Screening (age 45+ every 2 years)?" ~ "s2_offered_bowel_screen", 
+                                                         "Has a pharmacist or General Practitioner talked with you about reviewing your medications in the past year?" ~ "s2_recent_medication_review", 
+                                                         "Have you been offered a free National Breast Cancer Screening (mammogram) relevant to you (age 40+ every 2 years)?" ~ "s2_offered_breast_screen", 
+                                                         "Have you been offered recommended vaccinations relevant to you (such as Flu, Pneumonia, COVID or HPV vaccine)?" ~ "s2_offered_vaccines", 
+                                                         "Have you been offered a free National Lung Cancer Screening (aged 50+ and those who meet eligibility)?" ~ "s2_offered_lung_screen", 
+                                                         "Do you feel your skin is healthy and comfortable for you, without any changes that feel concerning?" ~ "s2_skin_healthy", 
+                                                         "Do you have access to sexual health information or services that meet your needs?" ~ "s2_access_sexual_health_supports", 
+                                                         "Do you feel supported to understand or manage your risk of diabetes or heart disease?" ~ "s2_supported_diabetes_heart_disease", 
+                                                         "Do you feel your bladder and bowel function is consistent and comfortable for you, without any discomfort or changes that concern you?" ~ "s2_bladder_bowel_function_normal",  
+                                                         # Daily life and wellbeing
+                                                         "Do you get the chance to do regular movement or exercise that feels good for you?" ~ "s3_regular_exercise", 
+                                                         "Do you feel you have access to a variety of foods that support your needs, preferences, and circumstances?" ~ "s3_food_variety", 
+                                                         "Are you usually able to eat enough food across the week in a way that feels nourishing?" ~ "s3_food_volume", 
+                                                         "Do you feel you drink enough water each day?" ~ "s3_enough_water", 
+                                                         "Have you been a non-smoker / non-vaper for the last 10 years?" ~ "s3_non_smoker", 
+                                                         "Have you been offered free smoking cessation support or Nicotine Replacement Therapy (NRT)?" ~ "s3_offered_smoking_cessation", 
+                                                         "Do you feel supported to talk about alcohol and other substance use if it is impacting your wellbeing and relationships" ~ "s3_support_aod", 
+                                                         # Pain, movement, & Understanding
+                                                         "Do you feel safe and stable when moving around?" ~ "s4_safe_moving", 
+                                                         "Do you feel your body is generally free from sores, swelling or ongoing pain?" ~ "s4_no_sores_swelling_pain", 
+                                                         "Do you feel your sleep supports your energy and wellbeing?" ~ "s4_good_sleep", 
+                                                         "Do you feel your body is supporting your wellbeing, without any recent changes in weight or shape that feel concerning?" ~ "s4_body_supports_wellbeing", 
+                                                         "Are your teeth and gums free from pain, bleeding or discomfort?" ~ "s4_teeth_healthy", 
+                                                         "Do you feel confident in your vision and ability to read or see clearly?" ~ "s4_confident_in_vision", 
+                                                         "Do you feel your hearing supports your communication and daily life?" ~ "s4_hearing_supports_daily_life", 
+                                                         "Summarise any areas of concern from the body chart" ~ "body_chart_areas", 
+                                                         "What feels most important to you about your physical health right now?" ~ "most_important_health", 
+                                                         "What helps you feel safe, respected, and heard when talking about your health?" ~ "what_supports_connection", 
+                                                         "What kind of support and next steps would be helpful for you right now in relation to your health?" ~ "what_supports", 
+                                                         "Please share any other health concerns" ~ "other_health_concerns", 
+                                                         "If consumer did not complete form, what was the reason:" ~ "why_not_completed"
+                    ),
+                    answer = stringr::str_to_sentence(answer)
+      )
+  }
+  
   step_a <-  function(measures, fundings) {
     a <-  measures |>
       dplyr::inner_join(fundings, by = c("PersonId" = "fldpersonid")) |> 
@@ -583,6 +638,18 @@ prep_measures <-  function(measures, fundings, type){
       # Custom filters and recodes
       k10_prep() |>
       step_c() |>
+      dplyr::bind_rows(tibble::tibble(
+        k10_q1 = character(), 
+        k10_q2 = character(), 
+        k10_q3 = character(), 
+        k10_q4 = character(), 
+        k10_q5 = character(), 
+        k10_q6 = character(), 
+        k10_q7 = character(), 
+        k10_q8 = character(), 
+        k10_q9 = character(), 
+        k10_q10 = character(),
+        k10_total = integer())) |>
       dplyr::mutate(#custom scoring
         collection_reason = standardise_measures(collection_reason, "occasion"),
         across(starts_with("k10_q"), k10_coder),
@@ -1025,6 +1092,95 @@ prep_measures <-  function(measures, fundings, type){
     return(out)
     
   }
+
+    if (type == "hprompt") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      hprompt_prep() |>
+      step_c() |> 
+      bind_rows(
+        tibble(s4_hearing_supports_daily_life = character(), 
+               s3_offered_smoking_cessation = character(), 
+               s2_offered_bowel_screen = character(), 
+               s2_skin_healthy = character(), 
+               s2_recent_medication_review = character(), 
+               s1_gender_affirming_care = character(), 
+               why_not_completed = character(), 
+               s4_body_supports_wellbeing = character(), 
+               s4_teeth_healthy = character(), 
+               s3_food_volume = character(), 
+               s3_support_aod = character(), 
+               s2_recent_dental_checkup = character(), 
+               s2_general_health_check = character(), 
+               s2_offered_pap_smear = character(), 
+               s2_offered_skin_check = character(), 
+               s4_confident_in_vision = character(), 
+               s3_non_smoker = character(), 
+               s3_enough_water = character(), 
+               s2_offered_breast_screen = character(), 
+               s2_offered_vaccines = character(), 
+               s1_confident_navigating_care = character(), 
+               s2_offered_lung_screen = character(), 
+               s4_safe_moving = character(), 
+               s4_good_sleep = character(), 
+               what_supports_connection = character(), 
+               s2_access_sexual_health_supports = character(), 
+               s2_supported_diabetes_heart_disease = character(), 
+               s1_practitioners_listen = character(), 
+               most_important_health = character(), 
+               s2_bladder_bowel_function_normal = character(), 
+               s4_no_sores_swelling_pain = character(), 
+               other_health_concerns = character(), 
+               s1_enough_medication_information = character(), 
+               what_supports = character(), 
+               s3_regular_exercise = character(), 
+               body_chart_areas = character(), 
+               s3_food_variety = character())
+      )  |> 
+      dplyr::relocate(
+        s1_confident_navigating_care,
+        s1_practitioners_listen,
+        s1_enough_medication_information,
+        s1_gender_affirming_care,
+        s2_recent_dental_checkup,
+        s2_general_health_check,
+        s2_offered_pap_smear,
+        s2_offered_skin_check,
+        s2_offered_bowel_screen,
+        s2_recent_medication_review,
+        s2_offered_breast_screen,
+        s2_offered_vaccines,
+        s2_offered_lung_screen,
+        s2_skin_healthy,
+        s2_access_sexual_health_supports,
+        s2_supported_diabetes_heart_disease,
+        s2_bladder_bowel_function_normal,
+        s3_regular_exercise,
+        s3_food_variety,
+        s3_food_volume,
+        s3_enough_water,
+        s3_non_smoker,
+        s3_offered_smoking_cessation,
+        s3_support_aod,
+        s4_safe_moving,
+        s4_no_sores_swelling_pain,
+        s4_good_sleep,
+        s4_body_supports_wellbeing,
+        s4_teeth_healthy,
+        s4_confident_in_vision,
+        s4_hearing_supports_daily_life,
+        body_chart_areas,
+        most_important_health,
+        what_supports_connection,
+        what_supports,
+        other_health_concerns,
+        why_not_completed, 
+        .after = everything())
+     
+    return(out)
+    
+  }
   
   if (type == "locals") {
     out <-  measures |>
@@ -1077,7 +1233,9 @@ prep_measures <-  function(measures, fundings, type){
       mutate(across(where(is.numeric), as.character), 
              core_form_id = str_extract(acp_filled_form_id, ".{36}"), # isolate original form id
              # confirm goal complete
-             goal_complete_entry = case_when(version_name == 'Locals - goal' ~ !if_any(.cols = c(date_added, my_goal, steps_towards_goal, whos_doing_what), is.na))
+             goal_complete_entry = case_when(version_name == 'Locals - goal' ~ !if_any(.cols = c(date_added, my_goal, 
+                                                                                                 steps_towards_goal, 
+                                                                                                 whos_doing_what), is.na))
              
       ) |>
       # per core_form_id, confirm at least one goal_complete_entry == TRUE
