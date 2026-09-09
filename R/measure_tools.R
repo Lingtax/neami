@@ -614,13 +614,15 @@ prep_measures <-  function(measures, fundings, type){
                          values_fill = NA) |>
       readr::type_convert() |>
       janitor::clean_names()  |>
-      dplyr::mutate(dplyr::across(tidyselect::where(is.logical), as.character)) |> 
+      dplyr::mutate(dplyr::across(tidyselect::where(is.logical), as.character),
+                    # Added to prevent dropping of nested forms based on date created
+                    parent_form_id = str_extract(acp_filled_form_id, "^.{36}")) |> 
       bind_rows(tibble(date_complete = character(),
                        collection_reason = character(),
                        completion_status = character(), 
                        decline_reason = character())) |> 
-      
-      
+      tidyr::fill(date_complete, .by = parent_form_id, .direction = "down") |> 
+      dplyr::select(-parent_form_id) |> 
       dplyr::mutate(date_complete = lubridate::dmy(date_complete),
                     date_complete = dplyr::case_when(is.na(date_complete) ~ date_created, 
                                                      TRUE ~ date_complete),
