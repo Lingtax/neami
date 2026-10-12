@@ -134,6 +134,10 @@ sdq_coder <- function(question, type, reverse = FALSE) {
 #' @export
 standardise_measures <- function(item, type = "occasion") {
   
+  if(all(is.na(item))) {
+    return(item)
+  }
+  
   if(type == "occasion") {
     idx <- c("Episode start" = "Episode start",
              "Episode end" = "Episode end",
