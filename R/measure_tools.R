@@ -1483,14 +1483,14 @@ prep_measures <-  function(measures, fundings, type){
       dplyr::mutate(complete = !if_any(
         c(consent_date,
           consent_made,
-          consent_for_my_health_record,
-          consent_for_anonymised_data_to_be_used_in_research_and_service_evaluation,
-          consent_to_be_contacted_to_be_involved_in_future_research,
-          consent_to_be_contacted_to_complete_feedback_and_evaluation_surveys,
-          consent_to_collect_personal_information_including_sensitive_health_information_and_sharing_my_personal_information_with_the_funder_of_this_service,
-          consent_to_share_information_relevant_to_my_care_with_other_people_mentioned_exclusively_in_the_hard_copy_form_and_or_organisations,
-          consent_to_the_transfer_of_information_to_another_service_provider,
-          consent_to_use_of_image_for_publication_internal_and_external,
+          # consent_for_my_health_record,
+          # consent_for_anonymised_data_to_be_used_in_research_and_service_evaluation,
+          # consent_to_be_contacted_to_be_involved_in_future_research,
+          # consent_to_be_contacted_to_complete_feedback_and_evaluation_surveys,
+          # consent_to_collect_personal_information_including_sensitive_health_information_and_sharing_my_personal_information_with_the_funder_of_this_service,
+          # consent_to_share_information_relevant_to_my_care_with_other_people_mentioned_exclusively_in_the_hard_copy_form_and_or_organisations,
+          # consent_to_the_transfer_of_information_to_another_service_provider,
+          # consent_to_use_of_image_for_publication_internal_and_external,
           obtained_by,
           provided_by), is.na))
      
