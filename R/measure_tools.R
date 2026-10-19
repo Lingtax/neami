@@ -255,17 +255,30 @@ prep_measures <-  function(measures, fundings, type){
                                               TRUE ~ as.character(answer))
       )
   }
+  
   lcq_prep <- function(lcq_data) {
     lcq_data |>
       dplyr::filter(
-        questiontext == "Completion Date" | 
-          stringr::str_detect(questiontext, 
-                     "^Amount of time|Living situation rating|Physical health_1|^Get support|^Hopefulness|^Part of group/community|^Wellbeing|^Achieve important things|^Happiness") 
-        ) |>
+        stringr::str_detect(questiontext,
+                            "This section asks some things about services you have used in the last 12 months|^Seeing a GP$|19. In the last 12 months, how many times did you see a general practitioner?|Other Health Professionals|20. In the last 12 months, did you see any of the following health professionals?|This section asks about some of the activities you did in the last four weeks|Looking for Work|15. In the last four weeks, were you actively looking for paid work at any time?|Living Situation|16. In the last four weeks, in what type of accommodation were you living?|17. Who were you living with in the last four weeks|18. How would you rate your current living situation overall?|This section asks about some of the activities you did in the last week|Social Activities|1. In the last week, did you do any of these social activities? Please tick all that apply|2. In the last week, about how much time did you spend doing all of these social activities?|3. In your opinion, was the amount of time you spent doing social activities last week|Education|4. Are you currently enrolled in any of the following courses of study|5. In the last week, in total, how many hours did you spend in class or studying for these courses?|6. In your opinion, was the amount of time you spent in education in the last week|Voluntary or unpaid work|7. In the last week, how much time did you spend doing voluntary or unpaid work through|8. In your opinion, was the amount of time you spent in voluntary|Caring for Others|9. In the last week, were you providing unpaid care to a family member|10. In the last week, in total, how many hours did you spend providing this care?|11. In your opinion, was the amount of time you spent caring for others in the last week…?|^Employment$|12. Of the following employment categories, which best describes your current employment?|13. Last week, how many hours did you work in total in these jobs?|14. In your opinion, was the amount of time you spent employed last week…?|This section asks some things that you are feeling or experiencing now|^Physical health$|21. In general, how is your physical health?|Having your say|22. How would you rate your confidence to do the following?|27. Would you like some help from Neami National with any of the things asked about|Please rate how you feel in each of the following areas|28. Your hopefulness for the future|29. Your happiness with your life|30. Your ability to achieve the things that are important to you|31. Your sense of being part of a group or community|32. Your ability to get support from family or friends when you need it|33. Your overall wellbeing", negate = TRUE)
+      ) |>
       dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Completion Date' ~ "date_complete",
+                                                    questiontext == 'None of the above ' ~ "sa_none",
+                                                    questiontext == 'None of the above_1' ~ "edu_none",
+                                                    questiontext == 'None of the above_2' ~ "caring_none",
+                                                    questiontext == 'No, none' ~ "healthpro_none",
+                                                    questiontext == 'Number of times (best estimate)' ~ "gp_count",
+                                                    questiontext == 'Other' & SectionName == 'Last Four Weeks'  ~ "livingsit_other",
+                                                    questiontext == 'Other_1' & SectionName == 'Last Four Weeks'  ~ "livingwith_other",
+                                                    
+                                                    questiontext == 'Other' & SectionName == 'Last 12 Months'  ~ "healthpro_other",
+                                                    questiontext == 'Other (please specify)' & SectionName == 'Last Four Weeks'  ~ "livingsit_other_spec",
+                                                    questiontext == 'Other (please specify)_1' & SectionName == 'Last Four Weeks'  ~ "livingwith_other_spec",
+                                                    
+                                                    questiontext == 'Other (please specify)' & SectionName == 'Last 12 Months'  ~ "healthpro_other_spec",
                                                     TRUE ~ questiontext),
                     answer = dplyr::case_when(stringr::str_detect(questiontext, 
-                                                                  "^Amount of time|Living situation rating|Physical health_1|^Get support|^Hopefulness|^Part of group/community|^Wellbeing|^Achieve important things|^Happiness")  ~ 
+                                                                  "^Amount of time|Living situation rating|Physical health_1|^Get support|^Hopefulness|^Part of group/community|^Wellbeing|^Achieve important things|^Happiness|Have your (say|opinion)|^Control your life in general")  ~ 
                                                 str_extract(answer, "\\d"),
                                               TRUE ~ as.character(answer))
       )
@@ -1021,10 +1034,149 @@ prep_measures <-  function(measures, fundings, type){
                        part_of_group_community = integer(),  
                        wellbeing = integer(),  
                        achieve_important_things = integer(),  
-                       happiness = integer())) |> 
-      mutate(across(.cols = matches("^amount_of_time|living_situation_rating|physical_health_1"), ~as.integer(.x)), 
-             total_overall = get_support + hopefulness + part_of_group_community + wellbeing + achieve_important_things + happiness)
-     
+                       happiness = integer(),
+                       a_child_under_15_years_of_age = character(),
+                       a_family_member_or_friend_because_of_disability_long_term_illness_or_old_age = character(),
+                       activities_at_home_with_friends_or_family = character(),
+                       activities_away_from_home_with_friends_or_family = character(),
+                       amount_of_time_spent_as_an_employee = integer(),
+                       amount_of_time_spent_caring_for_others = integer(),
+                       amount_of_time_spent_doing_social_activities = integer(),
+                       amount_of_time_spent_in_education = integer(),
+                       amount_of_time_spent_in_voluntary_or_unpaid_work = integer(),
+                       boarding_house_rooming_house_hostel = character(),
+                       by_yourself = character(),
+                       caravan = character(),
+                       case_worker_support_worker = character(),
+                       complementary_or_alternative_therapist = character(),
+                       control_your_life_in_general = integer(),
+                       crisis_accommodation_shelter_refuge = character(),
+                       employment_1 = character(),
+                       family = character(),
+                       family_home_or_unit_with_without_board = character(),
+                       friends = character(),
+                       going_out_on_your_own = character(),
+                       group_home_supported_accommodation = character(),
+                       have_your_opinions_respected_when_having_your_say = integer(),
+                       have_your_say_among_family_and_friends_about_issues_that_are_important_to_you = integer(),
+                       have_your_say_with_the_person_or_agency_involved_in_your_care = integer(),
+                       have_your_say_within_the_community_on_issues_that_are_important_to_you = integer(),
+                       homeless = character(),
+                       hospital_rehabilitation_other_health = character(),
+                       i_would_like_help_from_neami_national = character(),
+                       living_situation_rating = integer(),
+                       mental_health_nurse = character(),
+                       no_i_did_not_look_for_work = character(),
+                       other_caring = character(),
+                       other_caring_please_describe_the_care_provided = character(),
+                       other_courses = character(),
+                       other_social_activities = character(),
+                       own_home_or_unit_with_without_mortgage = character(),
+                       physical_health = character(),
+                       physical_health_1 = integer(),
+                       please_provide_actual_hours_worked = integer(),
+                       please_provide_the_approximate_number_of_hours_spent_doing_voluntary_or_unpaid_work = integer(),
+                       please_provide_the_approximate_number_of_hours_spent_in_class_or_studying_last_week = integer(),
+                       please_provide_the_approximate_number_of_hours_spent_providing_care_last_week = integer(),
+                       please_provide_the_estimated_number_of_hours_you_spent_on_these_activities = integer(),
+                       please_specify_the_help_you_would_like = character(),
+                       please_tick_if_no_hours_spent_providing_care = character(),
+                       please_tick_if_no_hours_spent_studying_for_these_courses = character(),
+                       please_tick_if_no_hours_were_spent_on_social_activities = character(),
+                       please_tick_if_you_did_not_do_any_voluntary_work = character(),
+                       privately_rented_house_or_unit = character(),
+                       psychiatrist_public_or_private = character(),
+                       psychologist_public_or_private = character(),
+                       public_rented_house_or_unit = character(),
+                       residential_aged_care_facility_nursing_home = character(),
+                       secondary_school = character(),
+                       share_house = character(),
+                       social_worker_or_occupational_therapist = character(),
+                       tafe_technical_vocational_registered_training_organisation = character(),
+                       telephone_or_online_interactions_with_friends_or_family = character(),
+                       university_other_higher_education = character(),
+                       yes_i_looked_for_full_time_work = character(),
+                       yes_i_looked_for_part_time_work = character(),
+                       caring_none = character(),
+                       edu_none = character(),
+                       gp_count = integer(),
+                       healthpro_none = character(),
+                       healthpro_other = character(),
+                       healthpro_other_spec = character(),
+                       livingsit_other = character(),
+                       livingsit_other_spec = character(),
+                       livingwith_other = character(),
+                       livingwith_other_spec = character(),
+                       sa_none = character())
+      ) |> 
+      mutate(sa_complete = rowSums(across(c(activities_at_home_with_friends_or_family,
+                                            telephone_or_online_interactions_with_friends_or_family,
+                                            activities_away_from_home_with_friends_or_family, going_out_on_your_own,
+                                            other_social_activities, sa_none), ~.x == "Yes"), na.rm = TRUE) != 0,
+             sa_time_complete = !is.na(please_provide_the_estimated_number_of_hours_you_spent_on_these_activities) |
+               please_tick_if_no_hours_were_spent_on_social_activities == "Yes", 
+             edu_complete = rowSums(across(c(secondary_school, university_other_higher_education,
+                                             tafe_technical_vocational_registered_training_organisation, other_courses, 
+                                             edu_none), ~.x == "Yes"), na.rm = TRUE) != 0,
+             edu_time_complete = !is.na(please_provide_the_approximate_number_of_hours_spent_in_class_or_studying_last_week) |
+               please_tick_if_no_hours_spent_studying_for_these_courses == "Yes", 
+             vol_time_complete = !is.na(please_provide_the_approximate_number_of_hours_spent_doing_voluntary_or_unpaid_work) |
+               please_tick_if_you_did_not_do_any_voluntary_work == "Yes", 
+             care_complete = rowSums(across(c(a_family_member_or_friend_because_of_disability_long_term_illness_or_old_age, 
+                                              a_child_under_15_years_of_age, other_caring, caring_none), ~.x == "Yes"), na.rm = TRUE) != 0,
+             care_time_complete = !is.na(please_provide_the_approximate_number_of_hours_spent_providing_care_last_week) |
+               please_tick_if_no_hours_spent_providing_care == "Yes",
+             emp_complete = !is.na(employment_1),
+             emp_time_complete = !is.na(please_provide_actual_hours_worked) | (!is.na(employment_1) & str_detect(employment_1, "^(Not employed|Unemployed)")),
+             lfw_complete = rowSums(across(c(yes_i_looked_for_full_time_work, yes_i_looked_for_part_time_work, no_i_did_not_look_for_work), ~.x == "Yes"), na.rm = TRUE) != 0,
+             lsit_complete = rowSums(across(c(public_rented_house_or_unit, privately_rented_house_or_unit,
+                                              own_home_or_unit_with_without_mortgage, family_home_or_unit_with_without_board, 
+                                              group_home_supported_accommodation, boarding_house_rooming_house_hostel,
+                                              caravan, hospital_rehabilitation_other_health, 
+                                              residential_aged_care_facility_nursing_home, crisis_accommodation_shelter_refuge, 
+                                              homeless, livingsit_other), ~.x == "Yes"), na.rm = TRUE) != 0,
+             lwith_complete = rowSums(across(c(by_yourself, family, friends, share_house, livingwith_other), ~.x == "Yes"), na.rm = TRUE) != 0,
+             gp_complete = !is.na(gp_count), 
+             healthpro_complete = rowSums(across(c(psychiatrist_public_or_private, psychologist_public_or_private, 
+                                                   mental_health_nurse, social_worker_or_occupational_therapist, 
+                                                   complementary_or_alternative_therapist, case_worker_support_worker,
+                                                   healthpro_other, healthpro_none), ~.x == "Yes"), na.rm = TRUE) != 0,
+             
+             havesay_complete = rowSums(across(c(control_your_life_in_general, 
+                                                 have_your_say_within_the_community_on_issues_that_are_important_to_you,
+                                                 have_your_say_with_the_person_or_agency_involved_in_your_care, 
+                                                 have_your_say_among_family_and_friends_about_issues_that_are_important_to_you, 
+                                                 have_your_opinions_respected_when_having_your_say), is.na), na.rm = TRUE) == 0,
+             ratings_complete = rowSums(across(matches("^amount_of_time|living_situation_rating|physical_health_1"), is.na), na.rm = TRUE) == 0,
+             help_complete = case_when(i_would_like_help_from_neami_national == "Yes" & !is.na(please_specify_the_help_you_would_like) ~ TRUE, 
+                                       i_would_like_help_from_neami_national == "No" ~ TRUE, 
+                                       is.na(i_would_like_help_from_neami_national) &  is.na(please_specify_the_help_you_would_like) ~ FALSE,
+                                       TRUE ~ FALSE),
+             lcq_complete= if_all(all_of(c("sa_complete",
+                                           "sa_time_complete",
+                                           "edu_complete",
+                                           "edu_time_complete",
+                                           "vol_time_complete",
+                                           "care_complete",
+                                           "care_time_complete",
+                                           "emp_complete",
+                                           "emp_time_complete",
+                                           "lfw_complete",
+                                           "lsit_complete",
+                                           "lwith_complete",
+                                           "gp_complete",
+                                           "healthpro_complete",
+                                           "havesay_complete",
+                                           "ratings_complete",
+                                           "help_complete"))),
+             across(.cols = matches("^amount_of_time|living_situation_rating|physical_health_1"), ~as.integer(.x)), 
+             have_say = control_your_life_in_general +
+               have_your_say_within_the_community_on_issues_that_are_important_to_you +
+               have_your_say_with_the_person_or_agency_involved_in_your_care +
+               have_your_say_among_family_and_friends_about_issues_that_are_important_to_you +
+               have_your_opinions_respected_when_having_your_say,
+             total_overall = get_support + hopefulness + part_of_group_community + wellbeing + achieve_important_things + happiness, 
+      )
     return(out)
     
   }
