@@ -885,7 +885,7 @@ prep_measures <-  function(measures, fundings, type){
       mutate(inspire_total = (i_do_things_that_mean_something_to_me + i_feel_good_about_myself + 
                                 i_feel_in_control_of_my_life + i_feel_supported_by_other_people +
                                 i_have_hopes_and_dreams_for_the_future) * 5,
-             complete = !is.na(inspire_total))
+             inspire_complete = !is.na(inspire_total))
     
     return(out)
     
@@ -1109,7 +1109,8 @@ prep_measures <-  function(measures, fundings, type){
                        livingwith_other_spec = character(),
                        sa_none = character())
       ) |> 
-      mutate(sa_complete = rowSums(across(c(activities_at_home_with_friends_or_family,
+      mutate(collection_reason = case_when(date_complete < funding_start %m+% months(1) ~ "Episode start"),
+             sa_complete = rowSums(across(c(activities_at_home_with_friends_or_family,
                                             telephone_or_online_interactions_with_friends_or_family,
                                             activities_away_from_home_with_friends_or_family, going_out_on_your_own,
                                             other_social_activities, sa_none), ~.x == "Yes"), na.rm = TRUE) != 0,
