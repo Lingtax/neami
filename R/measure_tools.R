@@ -882,7 +882,8 @@ prep_measures <-  function(measures, fundings, type){
                i_have_hopes_and_dreams_for_the_future  = character())
       ) |> 
       type_convert() |>
-      mutate(inspire_total = (i_do_things_that_mean_something_to_me + i_feel_good_about_myself + 
+      mutate(collection_reason = case_when(date_complete < funding_start %m+% months(1) ~ "Episode start"), 
+        inspire_total = (i_do_things_that_mean_something_to_me + i_feel_good_about_myself + 
                                 i_feel_in_control_of_my_life + i_feel_supported_by_other_people +
                                 i_have_hopes_and_dreams_for_the_future) * 5,
              inspire_complete = !is.na(inspire_total))
