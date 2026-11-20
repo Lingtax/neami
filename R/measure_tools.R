@@ -165,10 +165,10 @@ prep_measures <-  function(measures, fundings, type){
   
   if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "pwi", 
                    "wsas", "gses", "honos", "ras", "sidas", "ua", "lcq", "sn", 
-                   "isp", "intreg", "amhc_consent", "locals", 'locals_plan', 'locals_bpsa', 'hprompt'))) {
+                   "isp", "intreg", "amhc_consent", "locals", 'locals_plan', 'locals_bpsa', 'dbs', 'hprompt'))) {
     warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 
                      'wsas', 'gses', 'amhc_gp', 'pwi', 'honos', 'sidas', 'ua', 
-                     'lcq', 'sn', 'isp', 'intreg', 'hprompt', 'locals', 'locals_plan', 'locals_bpsa', 
+                     'lcq', 'sn', 'isp', 'intreg', 'hprompt', 'dbs', 'locals', 'locals_plan', 'locals_bpsa', 
                      'amhc_consent', or 'stsh'. Minimal prep applied.")
     }
   
@@ -518,6 +518,24 @@ prep_measures <-  function(measures, fundings, type){
       )
   }  
   
+  dbs_prep <- function(dbs_data) {
+    dbs_data |>
+      dplyr::filter(
+        stringr::str_detect(questiontext,
+                            "The episodes priority population status. People can belong to priority population for many reasons|1. Aboriginal and/or Torres Strait. 2. Islander Origin. 3. People from Refugee Background|Please do not leave the category field blank|Please add details in the below section when the ", negate = TRUE),
+        !(str_detect(questiontext, "Support/Guidance received prior to DBS|Reasons for previously not seeking support|Who would you have gone to for support if you did not connect with the service") & is.na(answer)) 
+      ) |>
+      dplyr::mutate(questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                    questiontext == "Support/Guidance received prior to DBS (select all that apply)" ~ paste0("prior_support_", answer), 
+                                                    questiontext == "Reasons for previously not seeking support (select all that apply)" ~ paste0("reason_avoid_support_", answer), 
+                                                    questiontext == "Who would you have gone to for support if you did not connect with the service (select all that apply)?" ~ paste0("alternate_support_", answer), 
+                                                    questiontext == "Date" & SectionName == "Subjective Units Distress Scale" ~ "suds_date", 
+                                                    questiontext == "Date" & SectionName == "Distress Drivers" ~ "distress_driver_date", 
+                                                    
+                                                    TRUE ~ questiontext)
+      )
+  }
+  
   hprompt_prep <- function(hprompt_form) {
     hprompt_form |>
       dplyr::filter_out(str_detect(questiontext, "^Section")) |>
@@ -603,15 +621,23 @@ prep_measures <-  function(measures, fundings, type){
     mutate(AcpFilledFormId = paste0(AcpFilledFormId, SubSectionRowCounter),
            version_name    = "UA plan")
     
+    ddrivers <-   a |> 
+      filter(version_name== 'Distress Brief Support Episode Form V2',
+             str_detect(SectionName,"^Distress Drivers$")) |> 
+      mutate(AcpFilledFormId = paste0(AcpFilledFormId, SubSectionRowCounter),
+             version_name    = "Distress Drivers")
+    
     
     a |> dplyr::filter(
            questiontext != "Area of Support Focus", 
            SectionName  != "Goal Setting", 
            SectionName  != "My Goals",
+           SectionName  != "Distress Drivers",
            version_name != 'PMHC MDS Universal Aftercare') |> 
       dplyr::bind_rows(aos,
                        goals, 
-                       ua_plans) |>
+                       ua_plans, 
+                       ddrivers) |>
       dplyr::group_by(AcpFilledFormId, questiontext) |>
       dplyr::filter(answer_modified_date == max(answer_modified_date, na.rm = TRUE) | is.na(answer_modified_date)) |>
       dplyr::ungroup()
@@ -694,7 +720,7 @@ prep_measures <-  function(measures, fundings, type){
                     severity = factor(case_when(k10_total < 16 ~ "Low Distress",
                                          k10_total < 22        ~ "Moderate Distress",
                                          k10_total < 30        ~ "High Distress",
-                                         TRUE                  ~ "Very High Distress"), 
+                                         k10_total  >= 30      ~ "Very High Distress"), 
                                       levels = c("Low Distress",
                                                  "Moderate Distress",
                                                  "High Distress",
@@ -1407,6 +1433,7 @@ prep_measures <-  function(measures, fundings, type){
     return(out)
     
   }
+ 
   if (type == "locals_bpsa") {
     out <-  measures |>
       step_a(fundings = fundings) |>
@@ -1521,6 +1548,135 @@ prep_measures <-  function(measures, fundings, type){
                       .after = everything()) |> 
       tidyr::drop_na(goal_area, start_date)
      
+    return(out)
+    
+  }
+  
+  if (type == "dbs") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      dbs_prep() |>
+      step_c() |> 
+      mutate(parent_form_id = str_extract(acp_filled_form_id, "^.{36}"),
+             # if description is required remove hash below
+             dd_complete = !if_any(.cols = c(distress_driver_date, category, distress_drivers#, description
+             ), .fns = is.na),
+             main_complete =  !if_any(.cols = c(date_complete, referral_date, referral_time, referral_type, referral_outcome,
+                                                first_contact_attempt_date, consumer_gender,
+                                                does_the_consumer_identifies_with_a_sexual_or_gender_minority,
+                                                consumer_cald_status, how_well_does_the_consumer_speak_english,
+                                                does_the_consumer_belong_to_priority_population,
+                                                consumers_highest_level_of_education_attainment, 
+                                                consumer_employment_participation, consumer_labour_force_status,
+                                                does_the_consumer_have_a_health_care_card,
+                                                has_the_consumer_been_homeless_in_the_4_weeks_prior_to_the_current_episode,
+                                                suds_date, suds_entry_rating), .fns = is.na),
+      ) |> 
+      mutate(dbs_complete = any(dd_complete, na.rm = TRUE) & any(main_complete, na.rm = TRUE), .by = parent_form_id) |> 
+      fill(date_complete, .direction = "down", .by= parent_form_id) |> 
+      bind_rows(tibble(
+        parent_form_id = character(),
+        date_complete = character(),
+        referral_date = character(),
+        referral_time = hms::new_hms(),
+        referral_type = character(),
+        other_referral_type = character(),
+        referral_outcome = character(),
+        first_contact_attempt_date = character(),
+        second_contact_attempt_date = character(),
+        third_contact_attempt_date = character(),
+        consumer_gender = character(),
+        consumer_self_described_gender = character(),
+        does_the_consumer_identifies_with_a_sexual_or_gender_minority = character(),
+        consumer_cald_status = character(),
+        how_well_does_the_consumer_speak_english = character(),
+        does_the_consumer_belong_to_priority_population = character(),
+        consumers_highest_level_of_education_attainment = character(),
+        consumer_employment_participation = character(),
+        consumer_labour_force_status = character(),
+        does_the_consumer_have_a_health_care_card = character(),
+        has_the_consumer_been_homeless_in_the_4_weeks_prior_to_the_current_episode = character(),
+        my_plan_status = character(),
+        care_continuity_status = character(),
+        post_support_follow_up_within_1_month = character(),
+        re_engagement = character(),
+        re_engagement_reason = character(),
+        other_re_engagement_reason = character(),
+        referral_out_date = character(),
+        referred_service = character(),
+        other_referred_service = character(),
+        comments = character(),
+        prior_support_i_did_not_ask_for_support = character(),
+        prior_support_i_reached_out_to_family_or_friends = character(),
+        prior_support_i_reached_out_to_online_or_telephone_supports = character(),
+        prior_support_i_talked_to_my_general_practitioner_gp = character(),
+        prior_support_i_went_to_a_community_mental_health_service = character(),
+        prior_support_other_please_specify = character(),
+        other_support_guidance = character(),
+        reason_avoid_support_i_couldnt_afford_the_support = character(),
+        reason_avoid_support_i_didnt_know_where_to_go_for_help = character(),
+        reason_avoid_support_i_didnt_need_support_before = character(),
+        reason_avoid_support_i_felt_embarrassed_about_asking_for_help = character(),
+        reason_avoid_support_i_had_a_bad_experience_previously = character(),
+        reason_avoid_support_i_was_able_to_cope_on_my_own = character(),
+        reason_avoid_support_i_wasnt_ready_for_support = character(),
+        reason_avoid_support_the_right_supports_werent_available_when_i_needed_them = character(),
+        reason_avoid_support_there_werent_any_supports_available_in_my_area = character(),
+        alternate_support_community_mental_health_service_medicare_mental_health_centres_headspace_reach_out_others = character(),
+        alternate_support_family_or_friends = character(),
+        alternate_support_general_practitioner_gp = character(),
+        alternate_support_i_would_not_have_accessed_support = character(),
+        alternate_support_other_please_specify = character(),
+        other_alternative_support = character(),
+        distress_driver_date = character(),
+        distress_drivers = character(),
+        category = character(),
+        description = character(),
+        collection_reason = character(),
+        completion_status = character(),
+        decline_reason = character(),
+        suds_date = character(),
+        suds_entry_rating = double(),
+        suds_exit_rating = double()
+      )
+      ) |> 
+      mutate(
+      ) |> 
+      dplyr::relocate(parent_form_id, date_complete, referral_date, referral_time, referral_type, other_referral_type,
+                      referral_outcome, first_contact_attempt_date, second_contact_attempt_date, 
+                      third_contact_attempt_date, consumer_gender,
+                      consumer_self_described_gender, does_the_consumer_identifies_with_a_sexual_or_gender_minority,
+                      consumer_cald_status, how_well_does_the_consumer_speak_english,
+                      does_the_consumer_belong_to_priority_population,
+                      consumers_highest_level_of_education_attainment, 
+                      consumer_employment_participation, consumer_labour_force_status,
+                      does_the_consumer_have_a_health_care_card,
+                      has_the_consumer_been_homeless_in_the_4_weeks_prior_to_the_current_episode,
+                      my_plan_status, care_continuity_status, post_support_follow_up_within_1_month, 
+                      re_engagement, re_engagement_reason,  other_re_engagement_reason,
+                      referral_out_date, referred_service,  other_referred_service, comments,
+                      prior_support_i_did_not_ask_for_support,  prior_support_i_reached_out_to_family_or_friends,
+                      prior_support_i_reached_out_to_online_or_telephone_supports,
+                      prior_support_i_talked_to_my_general_practitioner_gp,
+                      prior_support_i_went_to_a_community_mental_health_service, prior_support_other_please_specify,
+                      other_support_guidance,  reason_avoid_support_i_couldnt_afford_the_support,
+                      reason_avoid_support_i_didnt_know_where_to_go_for_help, reason_avoid_support_i_didnt_need_support_before,
+                      reason_avoid_support_i_felt_embarrassed_about_asking_for_help,
+                      reason_avoid_support_i_had_a_bad_experience_previously, reason_avoid_support_i_was_able_to_cope_on_my_own,
+                      reason_avoid_support_i_wasnt_ready_for_support, 
+                      reason_avoid_support_the_right_supports_werent_available_when_i_needed_them,
+                      reason_avoid_support_there_werent_any_supports_available_in_my_area,
+                      alternate_support_community_mental_health_service_medicare_mental_health_centres_headspace_reach_out_others,
+                      alternate_support_family_or_friends,  alternate_support_general_practitioner_gp,
+                      alternate_support_i_would_not_have_accessed_support,  alternate_support_other_please_specify,
+                      other_alternative_support, 
+                      distress_driver_date,  distress_drivers, category,  description,  collection_reason,  
+                      completion_status,  decline_reason, suds_date, suds_entry_rating, suds_exit_rating, 
+                      dd_complete,
+                      main_complete,
+                      dbs_complete,
+                      .after = date_created)
+    
     return(out)
     
   }
