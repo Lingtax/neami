@@ -165,11 +165,13 @@ prep_measures <-  function(measures, fundings, type){
   
   if(!(type %in% c("k10", "k5", "sdq", "pmhc", "stsh", "iar", "amhc_gp", "pwi", 
                    "wsas", "gses", "honos", "ras", "sidas", "ua", "lcq", "sn", 
-                   "isp", "intreg", "amhc_consent", "locals", 'locals_plan', 'locals_bpsa', 'dbs', 'hprompt'))) {
+                   "isp", "intreg", "amhc_consent", "locals", 'locals_plan', 'locals_bpsa', 
+                   'aods', 'dbs', 'hprompt'))) {
     warningCondition("Type is not one of 'k10', 'k5', 'sdq', 'pmhc', 'iar', 
                      'wsas', 'gses', 'amhc_gp', 'pwi', 'honos', 'sidas', 'ua', 
-                     'lcq', 'sn', 'isp', 'intreg', 'hprompt', 'dbs', 'locals', 'locals_plan', 'locals_bpsa', 
-                     'amhc_consent', or 'stsh'. Minimal prep applied.")
+                     'lcq', 'sn', 'isp', 'intreg', 'hprompt', 'dbs', 'locals', 
+                     'locals_plan', 'locals_bpsa','amhc_consent', 
+                     'aods', or 'stsh'. Minimal prep applied.")
     }
   
   k10_prep <- function(k10_data) {
@@ -535,6 +537,51 @@ prep_measures <-  function(measures, fundings, type){
                                                     TRUE ~ questiontext)
       )
   }
+  
+  aods_prep <- function(aods_data) {
+    aods_data |>
+      filter_out(answer == "NULL") |> 
+      dplyr::filter() |>
+      # Trim trailing whitespace
+      dplyr::mutate(questiontext = stringr::str_trim(questiontext), 
+                    # for AOD items, question is the common stem, and a true value is indicated by the name of the drug in the answer value
+                    # False values are inferred by omission.
+                    # This step codes whether theres a true value to the item
+                    aod_answer = case_when(questiontext == "Have you used any of the following substances in the past 4 weeks? (Select all that apply)" & !is.na(answer) ~ "TRUE",                                 
+                                           questiontext == "Have you used any of the following substances in the past 4 weeks? (Select all that apply)" & is.na(answer)  ~ "FALSE"),
+                    # Trim trailing whitespace
+                    answer = stringr::str_trim(answer), 
+                    # shorten drug names where id'd
+                    answer = case_when(
+                      answer == "Alcoholic beverages (Beer, wine, spirits)" ~ "Alcohol",
+                      answer == "Cannabis (marijuana, pot, grass, hash, synthetic cannabis etc)" ~ "Cannabis",
+                      answer == "Cocaine (Coke, crack)" ~ "Cocaine",
+                      answer == "GHB (Gamma-hydroxybutyrate, GBH, juice, G)" ~ "GHB",
+                      answer == "Hallucinogens (LSD, acid, mushrooms, PCP, ketamine, synthetic hallucinogens etc)" ~ "Hallucinogens",
+                      answer == "Inhalants (nitrous, glue, petrol, paint thinner, Amyl, poppers, whippets etc)" ~ "Inhalants",
+                      answer == "Methamphetamine (ice, speed, base)" ~ "Methamphetamines",
+                      answer == "Non-prescribed opioids (heroin, codeine, methadone, oxycodone, morphine etc)" ~ "Opioids_non_prescribed",
+                      answer == "Non-prescribed sedatives or sleeping pills (benzodiazepines, xanax, valium, serapax, rohypnol, stilnox etc)" ~ "Sedatives_non_prescribed",
+                      answer == "Other amphetamine type stimulants (MDMA /ecstasy, diet pills, synthetic ATS etc)" ~ "Other_Amphetamines",
+                      answer == "Other (steroids, caffeine/energy drinks, Phenergan, new and emerging drugs etc) " ~ "Other_Drugs",
+                      answer == "Prescribed opioids" ~  "Opioids_prescribed",
+                      answer == "Prescribed sedatives or sleeping pills" ~ "Sedatives_prescribed",
+                      answer == "Tobacco products (Cigarettes, cigars, chewing tobacco)" ~ "Tobacco",
+                      TRUE   ~  answer),
+                    questiontext = dplyr::case_when(questiontext == 'Date Completed' ~ "date_complete",
+                                                    #replace the common stem with the drug name for relevant items
+                                                    questiontext == "Have you used any of the following substances in the past 4 weeks? (Select all that apply)" & !is.na(answer) ~ answer,
+                                                    str_detect(questiontext, "Have you used alcohol and/or other drugs in the past 4 weeks?") ~ "Have you used AOD in the past 4 weeks?",
+                                                    TRUE ~ questiontext),
+                    # Then fill in the AOD answer value 
+                    answer = case_when(!is.na(answer) & !is.na(aod_answer) ~ aod_answer,
+                                       TRUE ~ answer)
+      ) |> 
+      select(-aod_answer) |>
+      # Drop the untransformed question stem names
+      filter_out(questiontext == "Have you used any of the following substances in the past 4 weeks? (Select all that apply)" & is.na(answer))
+  }
+  
   
   hprompt_prep <- function(hprompt_form) {
     hprompt_form |>
@@ -1707,6 +1754,59 @@ prep_measures <-  function(measures, fundings, type){
              # total score d is calculated by averaging all the domains, this puts less weight on the looking forward domain
              total_score_d = (d1_perc + d2_perc + d3_perc + d4_perc) / 4
       ) 
+    
+    return(out)
+    
+  }
+  
+  if (type == "aods") {
+    out <-  measures |>
+      step_a(fundings = fundings) |>
+      # Custom filters and recodes
+      aods_prep() |>
+      step_c() |> 
+      bind_rows(tibble( 
+        are_you_seeking_support_from_our_service_to_stop_or_reduce_your_alcohol_and_or_other_drug_use = character(),
+        have_you_used_aod_in_the_past_4_weeks = character(),
+        have_you_ever_injected_drugs = character(),
+        alcohol = character(),
+        cannabis = character(),
+        cocaine = character(),
+        ghb = character(),
+        hallucinogens = character(),
+        inhalants = character(),
+        methamphetamines = character(),
+        opioids_non_prescribed = character(),
+        other_amphetamines = character(),
+        other_drugs = character(),
+        opioids_prescribed = character(),
+        sedatives_prescribed = character(),
+        tobacco = character(),
+        sedatives_non_prescribed = character(),
+      )
+      ) |> 
+      mutate(aod_complete = !if_any(.cols = c(are_you_seeking_support_from_our_service_to_stop_or_reduce_your_alcohol_and_or_other_drug_use,
+                                              have_you_used_aod_in_the_past_4_weeks,
+                                              have_you_ever_injected_drugs), is.na)) |> 
+      dplyr::relocate(are_you_seeking_support_from_our_service_to_stop_or_reduce_your_alcohol_and_or_other_drug_use,
+                      have_you_used_aod_in_the_past_4_weeks,
+                      have_you_ever_injected_drugs,
+                      alcohol,
+                      tobacco,
+                      cannabis,
+                      inhalants,
+                      hallucinogens,
+                      cocaine,
+                      ghb,
+                      methamphetamines,
+                      other_amphetamines,
+                      opioids_prescribed,
+                      opioids_non_prescribed,
+                      sedatives_non_prescribed, 
+                      sedatives_prescribed,
+                      other_drugs,
+                      aod_complete,
+                      .after = date_complete)
     
     return(out)
     
